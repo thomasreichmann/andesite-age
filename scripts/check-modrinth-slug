@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Batch-check Modrinth project slug availability.
+# Reads slugs from stdin (one per line, # comments OK) and prints AVAILABLE / TAKEN.
+#
+# Usage: scripts/check-modrinth-slug < references/name-candidates.txt
+set -euo pipefail
+
+while IFS= read -r line; do
+  slug=$(echo "$line" | sed -e 's/#.*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+  [[ -z "$slug" ]] && continue
+  code=$(curl -sS -o /dev/null -w "%{http_code}" "https://api.modrinth.com/v2/project/$slug")
+  if [[ "$code" == "404" ]]; then
+    printf 'AVAILABLE\t%s\n' "$slug"
+  elif [[ "$code" == "200" ]]; then
+    printf 'TAKEN    \t%s\n' "$slug"
+  else
+    printf 'HTTP_%s\t%s\n' "$code" "$slug"
+  fi
+done

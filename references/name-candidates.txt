@@ -1,0 +1,59 @@
+# Candidate names for the modpack. Format: <slug>  # category, optional note
+# Categories: [explicit] = "create" appears in name; [flavor] = uses Create vocabulary
+# (cogs, brass, steam, mainspring, andesite); [evocative] = thematic but indirect.
+
+# === Explicit "Create" in name (15) ===
+create-and-vanilla
+create-essentials
+create-foundation
+create-curated
+create-pure
+create-grounded
+create-companion
+create-distilled
+create-unfiltered
+create-bedrock
+create-keystone
+create-spine
+create-canvas
+create-coda
+just-add-create
+
+# === Create-flavored insider terms (20) ===
+andesite-alloy
+andesite-age
+andesite-and-beyond
+andesite-uprising
+mainspring
+mainspring-mc
+mainspring-modpack
+flywheel
+flywheel-pact
+crankworks
+cog-and-crank
+cogwright
+brass-bones
+brass-and-brick
+brass-foundry
+brass-tacks
+first-cogs
+clockwise
+handcrank
+schematic-and-quill
+
+# === Evocative / poetic (15) ===
+steamheart
+steam-and-stone
+millworks
+founders-fire
+wrought
+ironworks
+tinker-vanilla
+gearpunk
+the-mechanist
+mechanists-handbook
+the-engineers-pact
+trade-and-tinker
+brass-vanilla
+ironside
+andesite-and-iron

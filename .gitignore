@@ -1,0 +1,11 @@
+# Secrets
+.env.local
+.env*.local
+*.key
+
+# Downloaded modpack archives for analysis
+/downloads/
+/tmp/
+
+# macOS
+.DS_Store

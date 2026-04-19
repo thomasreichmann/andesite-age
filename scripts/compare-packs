@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Build a cross-pack mod comparison matrix from references/*.json
+#
+# Usage:
+#   scripts/compare-packs               # all mods, sorted by pack count desc
+#   scripts/compare-packs --create      # only Create-ecosystem (slug contains "create")
+#   scripts/compare-packs --min 2       # only mods present in >= N packs
+#
+# Output: markdown table to stdout
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REFS_DIR="$PROJECT_ROOT/references"
+
+filter_create=false
+min_packs=1
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --create) filter_create=true; shift ;;
+    --min) min_packs="$2"; shift 2 ;;
+    *) echo "unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
+# Collect pack files in a stable order.
+packs=(cabin perfect-world create-astral create-arcane-engineering)
+
+# Build per-pack slug sets and a global slug -> { name, summary, downloadCount } map.
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+for pack in "${packs[@]}"; do
+  jq -r '.[] | select(.slug != null) | .slug' "$REFS_DIR/$pack.json" | sort -u > "$tmp/$pack.slugs"
+done
+
+# Merge all mod metadata into one slug-keyed map (last write wins; metadata is
+# the same across packs for a given slug).
+jq -s 'add | map({(.slug): {name, summary, downloadCount, latestGameVersions}}) | add' \
+  "$REFS_DIR"/*.json > "$tmp/meta.json"
+
+# Build the matrix as TSV first: slug name count cabin pw astral cae summary
+{
+  printf 'slug\tname\tcount\tcabin\tpw\tastral\tcae\tsummary\n'
+
+  # Union of all slugs
+  cat "$tmp"/*.slugs | sort -u | while IFS= read -r slug; do
+    [[ -z "$slug" ]] && continue
+    if $filter_create; then
+      [[ "$slug" =~ create ]] || continue
+    fi
+
+    in_cabin=0; in_pw=0; in_astral=0; in_cae=0
+    grep -Fxq "$slug" "$tmp/cabin.slugs" && in_cabin=1
+    grep -Fxq "$slug" "$tmp/perfect-world.slugs" && in_pw=1
+    grep -Fxq "$slug" "$tmp/create-astral.slugs" && in_astral=1
+    grep -Fxq "$slug" "$tmp/create-arcane-engineering.slugs" && in_cae=1
+    count=$((in_cabin + in_pw + in_astral + in_cae))
+    (( count >= min_packs )) || continue
+
+    name=$(jq -r --arg s "$slug" '.[$s].name // ""' "$tmp/meta.json")
+    summary=$(jq -r --arg s "$slug" '.[$s].summary // "" | gsub("\\|"; "/") | gsub("\n"; " ") | .[0:80]' "$tmp/meta.json")
+
+    printf '%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\n' "$slug" "$name" "$count" "$in_cabin" "$in_pw" "$in_astral" "$in_cae" "$summary"
+  done
+} > "$tmp/matrix.tsv"
+
+# Render TSV to markdown, sorted by count desc then slug asc.
+{
+  head -1 "$tmp/matrix.tsv"
+  tail -n +2 "$tmp/matrix.tsv" | sort -t$'\t' -k3,3rn -k1,1
+} | awk -F'\t' '
+  BEGIN { tick = "✓"; dot = "·" }
+  NR == 1 {
+    print "| slug | name | n | CAB | PW | AST | CAE | summary |"
+    print "|---|---|---|:-:|:-:|:-:|:-:|---|"
+    next
+  }
+  {
+    for (i = 4; i <= 7; i++) $i = ($i == "1" ? tick : dot)
+    printf "| %s | %s | %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6, $7, $8
+  }
+'

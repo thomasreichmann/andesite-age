@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# For each slug in references/shortlist.txt, query CurseForge and report
+# which MC versions / loaders have a file.
+#
+# Output: a markdown table plus a machine-readable JSON alongside.
+#
+# Usage:
+#   scripts/verify-versions                     # default: 1.21.1 focus
+#   scripts/verify-versions --mc 1.21.4         # focus a different MC version
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CF_API="$PROJECT_ROOT/scripts/cf-api"
+SHORTLIST="$PROJECT_ROOT/references/shortlist.txt"
+OUT_JSON="$PROJECT_ROOT/references/versions.json"
+OUT_MD="$PROJECT_ROOT/references/versions.md"
+
+target_mc="1.21.1"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --mc) target_mc="$2"; shift 2 ;;
+    *) echo "unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
+# modLoader IDs per CF API
+loader_name() {
+  case "$1" in
+    0) echo "Any" ;;
+    1) echo "Forge" ;;
+    4) echo "Fabric" ;;
+    5) echo "Quilt" ;;
+    6) echo "NeoForge" ;;
+    *) echo "id=$1" ;;
+  esac
+}
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+ndjson="$tmp/results.ndjson"
+: > "$ndjson"
+
+# Read shortlist: strip comments, drop blanks, dedupe.
+grep -vE '^\s*(#|$)' "$SHORTLIST" | awk '{print $1}' | awk '!seen[$0]++' > "$tmp/slugs.txt"
+count=$(wc -l < "$tmp/slugs.txt" | tr -d ' ')
+echo "Verifying $count slugs against MC $target_mc..." >&2
+
+i=0
+while IFS= read -r slug; do
+  i=$((i+1))
+  [[ -z "$slug" ]] && continue
+  printf '  [%02d/%02d] %s\n' "$i" "$count" "$slug" >&2
+
+  resp=$("$CF_API" "/v1/mods/search?gameId=432&classId=6&slug=$slug")
+  hit=$(jq -c '.data[0] // null' <<<"$resp")
+
+  if [[ "$hit" == "null" ]]; then
+    jq -nc --arg slug "$slug" '{slug: $slug, found: false}' >> "$ndjson"
+    continue
+  fi
+
+  jq -c --arg slug "$slug" --arg mc "$target_mc" '
+    {
+      slug: $slug,
+      found: true,
+      id: .id,
+      name: .name,
+      downloadCount,
+      websiteUrl: .links.websiteUrl,
+      sourceUrl: .links.sourceUrl,
+      mcVersions: ([.latestFilesIndexes[].gameVersion] | unique),
+      loaders_on_target: (
+        [.latestFilesIndexes[]
+          | select(.gameVersion == $mc)
+          | .modLoader] | unique
+      ),
+      loaders_on_1_21_x: (
+        [.latestFilesIndexes[]
+          | select(.gameVersion | startswith("1.21"))
+          | {v: .gameVersion, l: .modLoader}]
+      ),
+      latest_file_1_21_x: (
+        [.latestFilesIndexes[] | select(.gameVersion | startswith("1.21"))]
+        | sort_by(.gameVersion) | reverse | .[0] // null
+      )
+    }
+  ' <<<"$hit" >> "$ndjson"
+done < "$tmp/slugs.txt"
+
+# Combine into JSON array
+jq -s '.' "$ndjson" > "$OUT_JSON"
+echo "Wrote $OUT_JSON" >&2
+
+# Render markdown table
+{
+  echo "# 1.21.x availability report (target: $target_mc)"
+  echo ""
+  echo "Loader codes: **1**=Forge, **4**=Fabric, **5**=Quilt, **6**=NeoForge"
+  echo ""
+  echo "| slug | name | DL | on ${target_mc}? | loaders @ ${target_mc} | also on 1.21.x | status |"
+  echo "|---|---|---:|:-:|---|---|---|"
+  jq -r --arg mc "$target_mc" '
+    sort_by(.slug)[] |
+    if (.found | not) then
+      "| \(.slug) | *(not found)* |  | — | — | — | ❌ missing |"
+    else
+      (if (.loaders_on_target | length) > 0 then "✓" else "·" end) as $ontgt |
+      (.loaders_on_target | map(tostring) | join(",")) as $ltgt |
+      ([.loaders_on_1_21_x[] | "\(.v)/L\(.l)"] | unique | join(", ")) as $l21 |
+      (if (.loaders_on_target | length) > 0 then "✅ target"
+       elif ([.loaders_on_1_21_x[] | .] | length) > 0 then "🟡 other 1.21.x"
+       elif (.mcVersions | any(startswith("1.21")) | not) then "🔶 fork candidate"
+       else "⚠️  check"
+       end) as $status |
+      "| [\(.slug)](\(.websiteUrl)) | \(.name) | \(.downloadCount) | \($ontgt) | \($ltgt) | \($l21) | \($status) |"
+    end
+  ' "$OUT_JSON"
+} > "$OUT_MD"
+echo "Wrote $OUT_MD" >&2
+cat "$OUT_MD"

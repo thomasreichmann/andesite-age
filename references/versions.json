@@ -1,0 +1,1813 @@
+[
+  {
+    "slug": "create",
+    "found": true,
+    "id": 328085,
+    "name": "Create",
+    "downloadCount": 181269729,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create",
+    "sourceUrl": "https://github.com/Creators-of-Create/Create",
+    "mcVersions": [
+      "1.14.4",
+      "1.15.2",
+      "1.16.3",
+      "1.16.4",
+      "1.16.5",
+      "1.18",
+      "1.18.1",
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7408951,
+      "filename": "create-1.21.1-6.0.9.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-steam-n-rails",
+    "found": true,
+    "id": 688231,
+    "name": "Create: Steam 'n' Rails",
+    "downloadCount": 57205757,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-steam-n-rails",
+    "sourceUrl": "https://github.com/Layers-of-Railways/Railway",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.20.1"
+    ],
+    "loaders_on_target": [],
+    "loaders_on_1_21_x": [],
+    "latest_file_1_21_x": null
+  },
+  {
+    "slug": "create-new-age",
+    "found": true,
+    "id": 905861,
+    "name": "Create: New Age",
+    "downloadCount": 21524988,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-new-age",
+    "sourceUrl": "https://gitlab.com/antarcticgardens/create-new-age",
+    "mcVersions": [
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7388244,
+      "filename": "create-new-age-1.1.7c+neoforge-mc1.21.1.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "copycats",
+    "found": true,
+    "id": 968398,
+    "name": "Create: Copycats+",
+    "downloadCount": 32357467,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/copycats",
+    "sourceUrl": "https://github.com/copycats-plus/copycats",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7251823,
+      "filename": "copycats-3.0.4+mc.1.21.1-neoforge.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-central-kitchen",
+    "found": true,
+    "id": 820977,
+    "name": "Create: Central Kitchen",
+    "downloadCount": 28480570,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-central-kitchen",
+    "sourceUrl": "https://github.com/DragonsPlusMinecraft/CreateCentralKitchen",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 6502927,
+      "filename": "create-central-kitchen-2.0.1.jar",
+      "releaseType": 3,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-deco",
+    "found": true,
+    "id": 509285,
+    "name": "Create Deco",
+    "downloadCount": 35252279,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-deco",
+    "sourceUrl": "https://github.com/talrey/CreateDeco",
+    "mcVersions": [
+      "1.16.5",
+      "1.18",
+      "1.18.1",
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7943181,
+      "filename": "createdeco-2.1.3.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-stuff-additions",
+    "found": true,
+    "id": 466792,
+    "name": "Create Stuff 'N Additions",
+    "downloadCount": 27998893,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-stuff-additions",
+    "sourceUrl": "https://youtu.be/sxawWKuA4JM?si=kSUb6A6HDJRRpw7s",
+    "mcVersions": [
+      "1.16.5",
+      "1.17.1",
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 6448012,
+      "filename": "create-stuff-additions1.21.1_v2.1.0e.jar",
+      "releaseType": 2,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "createaddition",
+    "found": true,
+    "id": 439890,
+    "name": "Create Crafts & Additions",
+    "downloadCount": 94877528,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/createaddition",
+    "sourceUrl": "https://github.com/mrh0/createaddition",
+    "mcVersions": [
+      "1.15.2",
+      "1.16.4",
+      "1.16.5",
+      "1.17.1",
+      "1.18.1",
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 6440464,
+      "filename": "createaddition-1.4.1.jar",
+      "releaseType": 3,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-chunkloading",
+    "found": true,
+    "id": 494206,
+    "name": "Create Chunkloading",
+    "downloadCount": 8195504,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-chunkloading",
+    "sourceUrl": "https://github.com/embeddedt/CreateChunkloading",
+    "mcVersions": [
+      "1.16.4",
+      "1.16.5",
+      "1.18.1",
+      "1.18.2",
+      "1.19.2",
+      "1.20.1"
+    ],
+    "loaders_on_target": [],
+    "loaders_on_1_21_x": [],
+    "latest_file_1_21_x": null
+  },
+  {
+    "slug": "create-enchantment-industry",
+    "found": true,
+    "id": 688768,
+    "name": "Create: Enchantment Industry",
+    "downloadCount": 46922998,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-enchantment-industry",
+    "sourceUrl": "https://github.com/DragonsPlusMinecraft/CreateEnchantmentIndustry",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 6446896,
+      "filename": "create-enchantment-industry-2.0.11.jar",
+      "releaseType": 2,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-jetpack",
+    "found": true,
+    "id": 655608,
+    "name": "Create Jetpack",
+    "downloadCount": 18529735,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-jetpack",
+    "sourceUrl": "https://github.com/PssbleTrngle/CreateJetpack",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7285435,
+      "filename": "create_jetpack-forge-5.1.2.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-confectionery",
+    "found": true,
+    "id": 531834,
+    "name": "Create Confectionery",
+    "downloadCount": 17361949,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-confectionery",
+    "sourceUrl": "https://youtu.be/sxawWKuA4JM?si=kSUb6A6HDJRRpw7s",
+    "mcVersions": [
+      "1.16.5",
+      "1.17.1",
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 6495225,
+      "filename": "create-confectionery1.21.1_v1.1.2.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-big-cannons",
+    "found": true,
+    "id": 646668,
+    "name": "Create Big Cannons",
+    "downloadCount": 17090168,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-big-cannons",
+    "sourceUrl": "https://github.com/Cannoneers-of-Create/CreateBigCannons",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7689060,
+      "filename": "createbigcannons-5.11.2-mc.1.21.1.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-liquid-fuel",
+    "found": true,
+    "id": 840734,
+    "name": "Create: Liquid Fuel",
+    "downloadCount": 5382113,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-liquid-fuel",
+    "sourceUrl": "https://github.com/Forsteri123/CreateLiquidFuel",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 6521990,
+      "filename": "createliquidfuel-2.1.1-1.21.1.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-recycle-everything",
+    "found": true,
+    "id": 872577,
+    "name": "Create Recycle Everything",
+    "downloadCount": 8451736,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-recycle-everything",
+    "sourceUrl": null,
+    "mcVersions": [
+      "1.15.2",
+      "1.16.5",
+      "1.18.2",
+      "1.19.2",
+      "1.20.1"
+    ],
+    "loaders_on_target": [],
+    "loaders_on_1_21_x": [],
+    "latest_file_1_21_x": null
+  },
+  {
+    "slug": "create-additional-recipes",
+    "found": true,
+    "id": 953547,
+    "name": "Create: Additional Recipes",
+    "downloadCount": 2247927,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-additional-recipes",
+    "sourceUrl": null,
+    "mcVersions": [
+      "1.20.1"
+    ],
+    "loaders_on_target": [],
+    "loaders_on_1_21_x": [],
+    "latest_file_1_21_x": null
+  },
+  {
+    "slug": "create-power-loader",
+    "found": true,
+    "id": 936020,
+    "name": "Create: Power Loader",
+    "downloadCount": 6648068,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-power-loader",
+    "sourceUrl": "https://github.com/hlysine/create_power_loader",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.19.3",
+      "1.19.4",
+      "1.20.1",
+      "1.20.2",
+      "1.20.3",
+      "1.20.4",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 6549980,
+      "filename": "create_power_loader-2.0.3-mc1.21.1.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-extended-cogs",
+    "found": true,
+    "id": 739973,
+    "name": "Create: Extended Cogwheels ",
+    "downloadCount": 5501544,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-extended-cogs",
+    "sourceUrl": "https://github.com/Rabbitminers/Extended-Cogs",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.20.1"
+    ],
+    "loaders_on_target": [],
+    "loaders_on_1_21_x": [],
+    "latest_file_1_21_x": null
+  },
+  {
+    "slug": "create-encased",
+    "found": true,
+    "id": 829380,
+    "name": "Create Encased",
+    "downloadCount": 8389432,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-encased",
+    "sourceUrl": "https://git-encased.iglee.fr",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7459750,
+      "filename": "Create Encased-1.21.1-1.8-ht2.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "create-alloyed",
+    "found": true,
+    "id": 564792,
+    "name": "Create: Alloyed",
+    "downloadCount": 3967142,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/create-alloyed",
+    "sourceUrl": "https://github.com/MythrilBagels/Create-Alloyed",
+    "mcVersions": [
+      "1.16.5",
+      "1.18.1",
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21.1",
+      "26.1",
+      "26.1.1",
+      "26.1.2"
+    ],
+    "loaders_on_target": [
+      4,
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 4
+      },
+      {
+        "v": "1.21.1",
+        "l": 4
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7830509,
+      "filename": "alloyed-3.0.3+1.21.1-fabric-dev.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 4
+    }
+  },
+  {
+    "slug": "interiors",
+    "found": true,
+    "id": 906239,
+    "name": "Create: Interiors",
+    "downloadCount": 15847903,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/interiors",
+    "sourceUrl": "https://github.com/sudolev/CreateInteriorsMod",
+    "mcVersions": [
+      "1.18",
+      "1.18.1",
+      "1.18.2",
+      "1.19",
+      "1.19.1",
+      "1.19.2",
+      "1.19.3",
+      "1.19.4",
+      "1.20",
+      "1.20.1",
+      "1.20.2",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7544005,
+      "filename": "interiors-1.21.1-neoforge-0.6.1.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "rechiseled-create",
+    "found": true,
+    "id": 888624,
+    "name": "Rechiseled: Create",
+    "downloadCount": 23664536,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/rechiseled-create",
+    "sourceUrl": "https://github.com/SuperMartijn642/RechiseledCreate",
+    "mcVersions": [
+      "1.18",
+      "1.18.1",
+      "1.18.2",
+      "1.19.2",
+      "1.20",
+      "1.20.1",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7522529,
+      "filename": "rechiseledcreate-1.1.0-neoforge-mc1.21.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "ars-creo",
+    "found": true,
+    "id": 575698,
+    "name": "Ars Creo",
+    "downloadCount": 36287538,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/ars-creo",
+    "sourceUrl": "https://github.com/baileyholl/Ars-Creo",
+    "mcVersions": [
+      "1.16.5",
+      "1.18.1",
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.21",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7528185,
+      "filename": "ars_creo-1.21.1-5.2.0.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "ars-nouveau",
+    "found": true,
+    "id": 401955,
+    "name": "Ars Nouveau",
+    "downloadCount": 101916901,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/ars-nouveau",
+    "sourceUrl": "https://github.com/baileyholl/Ars-Nouveau",
+    "mcVersions": [
+      "1.15",
+      "1.15.2",
+      "1.16.2",
+      "1.16.3",
+      "1.16.4",
+      "1.16.5",
+      "1.18",
+      "1.18.1",
+      "1.18.2",
+      "1.19",
+      "1.19.1",
+      "1.19.2",
+      "1.20",
+      "1.20.1",
+      "1.20.2",
+      "1.21",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7764018,
+      "filename": "ars_nouveau-1.21.1-5.11.3.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "compressedcreativity",
+    "found": true,
+    "id": 549381,
+    "name": "Compressed Creativity",
+    "downloadCount": 3647236,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/compressedcreativity",
+    "sourceUrl": "https://github.com/Lgmrszd/CompressedCreativity",
+    "mcVersions": [
+      "1.16.5",
+      "1.18.2",
+      "1.19.2",
+      "1.20.1"
+    ],
+    "loaders_on_target": [],
+    "loaders_on_1_21_x": [],
+    "latest_file_1_21_x": null
+  },
+  {
+    "slug": "cccbridge",
+    "found": true,
+    "id": 656214,
+    "name": "CC:C Bridge",
+    "downloadCount": 7856844,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/cccbridge",
+    "sourceUrl": "https://github.com/tweaked-programs/cccbridge",
+    "mcVersions": [
+      "1.18.2",
+      "1.19.2",
+      "1.20.1",
+      "1.20.2",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 6757769,
+      "filename": "cccbridge-mc1.21.1-v1.7.2-neoforge.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "custom-machinery",
+    "found": true,
+    "id": 457017,
+    "name": "Custom Machinery",
+    "downloadCount": 5749669,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/custom-machinery",
+    "sourceUrl": "https://github.com/Frinn38/Custom-Machinery",
+    "mcVersions": [
+      "1.16.4",
+      "1.16.5",
+      "1.18.2",
+      "1.19.2",
+      "1.21",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7916008,
+      "filename": "CustomMachinery-neoforge-1.21.1-0.10.63.jar",
+      "releaseType": 2,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "daves-building-extended",
+    "found": true,
+    "id": 568645,
+    "name": "Dave's Building Extended",
+    "downloadCount": 1071354,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/daves-building-extended",
+    "sourceUrl": "https://github.com/SpaceDave1337/dbExtended",
+    "mcVersions": [
+      "1.16.5",
+      "1.17.1",
+      "1.18.2",
+      "1.19.2",
+      "1.19.4",
+      "1.20.1"
+    ],
+    "loaders_on_target": [],
+    "loaders_on_1_21_x": [],
+    "latest_file_1_21_x": null
+  },
+  {
+    "slug": "chisels-bits",
+    "found": true,
+    "id": 231095,
+    "name": "Chisels & Bits - For Forge",
+    "downloadCount": 137654113,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/chisels-bits",
+    "sourceUrl": "https://github.com/AlgorithmX2/Chisels-and-Bits",
+    "mcVersions": [
+      "1.10.2",
+      "1.11.2",
+      "1.12",
+      "1.12.1",
+      "1.12.2",
+      "1.16.2",
+      "1.16.3",
+      "1.16.4",
+      "1.16.5",
+      "1.17.1",
+      "1.18.1",
+      "1.18.2",
+      "1.19.2",
+      "1.19.3",
+      "1.19.4",
+      "1.20",
+      "1.20.1",
+      "1.20.4",
+      "1.21.1",
+      "1.21.10",
+      "1.21.11",
+      "1.8.9",
+      "1.9.4"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.10",
+        "l": 6
+      },
+      {
+        "v": "1.21.11",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.11",
+      "fileId": 7657335,
+      "filename": "chisels-and-bits-neoforge-21.11.45.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "kubejs",
+    "found": true,
+    "id": 238086,
+    "name": "KubeJS",
+    "downloadCount": 139165361,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/kubejs",
+    "sourceUrl": "https://github.com/KubeJS-Mods/KubeJS",
+    "mcVersions": [
+      "1.12.2",
+      "1.14.4",
+      "1.15.1",
+      "1.15.2",
+      "1.16.1",
+      "1.16.2",
+      "1.16.3",
+      "1.16.4",
+      "1.16.5",
+      "1.18",
+      "1.18.1",
+      "1.18.2",
+      "1.19",
+      "1.19.2",
+      "1.20.1",
+      "1.20.4",
+      "1.21",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 7278501,
+      "filename": "kubejs-neoforge-2101.7.2-build.348.jar",
+      "releaseType": 2,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "jade",
+    "found": true,
+    "id": 324717,
+    "name": "Jade 🔍",
+    "downloadCount": 224581023,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/jade",
+    "sourceUrl": "https://github.com/Snownee/Jade",
+    "mcVersions": [
+      "1.12.2",
+      "1.15.2",
+      "1.16.3",
+      "1.16.4",
+      "1.16.5",
+      "1.17.1",
+      "1.18",
+      "1.18.1",
+      "1.18.2",
+      "1.19",
+      "1.19.1",
+      "1.19.2",
+      "1.19.3",
+      "1.19.4",
+      "1.20",
+      "1.20.1",
+      "1.20.2",
+      "1.20.3",
+      "1.20.4",
+      "1.20.5",
+      "1.20.6",
+      "1.21",
+      "1.21.1",
+      "1.21.10",
+      "1.21.11",
+      "1.21.2",
+      "1.21.3",
+      "1.21.4",
+      "1.21.5",
+      "1.21.6",
+      "1.21.7",
+      "1.21.8",
+      "1.21.9",
+      "26.1",
+      "26.1.1",
+      "26.1.2"
+    ],
+    "loaders_on_target": [
+      4,
+      5,
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.11",
+        "l": 6
+      },
+      {
+        "v": "1.21.11",
+        "l": 4
+      },
+      {
+        "v": "1.21.11",
+        "l": 5
+      },
+      {
+        "v": "1.21.11",
+        "l": 6
+      },
+      {
+        "v": "1.21.11",
+        "l": 4
+      },
+      {
+        "v": "1.21.11",
+        "l": 5
+      },
+      {
+        "v": "1.21.1",
+        "l": 4
+      },
+      {
+        "v": "1.21.1",
+        "l": 5
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21.9",
+        "l": 4
+      },
+      {
+        "v": "1.21.9",
+        "l": 5
+      },
+      {
+        "v": "1.21.10",
+        "l": 4
+      },
+      {
+        "v": "1.21.10",
+        "l": 5
+      },
+      {
+        "v": "1.21.9",
+        "l": 4
+      },
+      {
+        "v": "1.21.9",
+        "l": 5
+      },
+      {
+        "v": "1.21.10",
+        "l": 4
+      },
+      {
+        "v": "1.21.10",
+        "l": 5
+      },
+      {
+        "v": "1.21.9",
+        "l": 6
+      },
+      {
+        "v": "1.21.10",
+        "l": 6
+      },
+      {
+        "v": "1.21.8",
+        "l": 4
+      },
+      {
+        "v": "1.21.8",
+        "l": 5
+      },
+      {
+        "v": "1.21.7",
+        "l": 4
+      },
+      {
+        "v": "1.21.7",
+        "l": 5
+      },
+      {
+        "v": "1.21.6",
+        "l": 4
+      },
+      {
+        "v": "1.21.6",
+        "l": 5
+      },
+      {
+        "v": "1.21.8",
+        "l": 6
+      },
+      {
+        "v": "1.21.7",
+        "l": 6
+      },
+      {
+        "v": "1.21.6",
+        "l": 6
+      },
+      {
+        "v": "1.21.8",
+        "l": 4
+      },
+      {
+        "v": "1.21.8",
+        "l": 5
+      },
+      {
+        "v": "1.21.7",
+        "l": 4
+      },
+      {
+        "v": "1.21.7",
+        "l": 5
+      },
+      {
+        "v": "1.21.6",
+        "l": 4
+      },
+      {
+        "v": "1.21.6",
+        "l": 5
+      },
+      {
+        "v": "1.21.8",
+        "l": 6
+      },
+      {
+        "v": "1.21.7",
+        "l": 6
+      },
+      {
+        "v": "1.21.6",
+        "l": 6
+      },
+      {
+        "v": "1.21.5",
+        "l": 6
+      },
+      {
+        "v": "1.21.5",
+        "l": 4
+      },
+      {
+        "v": "1.21.5",
+        "l": 5
+      },
+      {
+        "v": "1.21.1",
+        "l": 4
+      },
+      {
+        "v": "1.21.1",
+        "l": 5
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21.4",
+        "l": 6
+      },
+      {
+        "v": "1.21.4",
+        "l": 4
+      },
+      {
+        "v": "1.21.4",
+        "l": 5
+      },
+      {
+        "v": "1.21.4",
+        "l": 4
+      },
+      {
+        "v": "1.21.4",
+        "l": 5
+      },
+      {
+        "v": "1.21.3",
+        "l": 6
+      },
+      {
+        "v": "1.21.3",
+        "l": 4
+      },
+      {
+        "v": "1.21.3",
+        "l": 5
+      },
+      {
+        "v": "1.21.3",
+        "l": 6
+      },
+      {
+        "v": "1.21.3",
+        "l": 4
+      },
+      {
+        "v": "1.21.3",
+        "l": 5
+      },
+      {
+        "v": "1.21.2",
+        "l": 4
+      },
+      {
+        "v": "1.21.2",
+        "l": 5
+      },
+      {
+        "v": "1.21.2",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 4
+      },
+      {
+        "v": "1.21.1",
+        "l": 5
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 4
+      },
+      {
+        "v": "1.21",
+        "l": 5
+      },
+      {
+        "v": "1.21",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 4
+      },
+      {
+        "v": "1.21",
+        "l": 5
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.9",
+      "fileId": 7056468,
+      "filename": "Jade-1.21.9-NeoForge-20.0.5.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "jei",
+    "found": true,
+    "id": 238222,
+    "name": "Just Enough Items (JEI)",
+    "downloadCount": 561532099,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/jei",
+    "sourceUrl": "https://github.com/mezz/JustEnoughItems",
+    "mcVersions": [
+      "1.10",
+      "1.10.2",
+      "1.11",
+      "1.11.2",
+      "1.12",
+      "1.12.1",
+      "1.12.2",
+      "1.13.2",
+      "1.14.2",
+      "1.14.3",
+      "1.14.4",
+      "1.15.1",
+      "1.15.2",
+      "1.16.1",
+      "1.16.2",
+      "1.16.3",
+      "1.16.4",
+      "1.16.5",
+      "1.17.1",
+      "1.18",
+      "1.18.1",
+      "1.18.2",
+      "1.19",
+      "1.19.1",
+      "1.19.2",
+      "1.19.3",
+      "1.19.4",
+      "1.20",
+      "1.20.1",
+      "1.20.2",
+      "1.20.4",
+      "1.20.6",
+      "1.21",
+      "1.21.1",
+      "1.21.10",
+      "1.21.11",
+      "1.21.4",
+      "1.21.5",
+      "1.21.7",
+      "1.21.8",
+      "1.21.9",
+      "1.8",
+      "1.8.8",
+      "1.8.9",
+      "1.9",
+      "1.9.4",
+      "26.1",
+      "26.1.1",
+      "26.1.2"
+    ],
+    "loaders_on_target": [
+      1,
+      4,
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.11",
+        "l": 6
+      },
+      {
+        "v": "1.21.11",
+        "l": 4
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 1
+      },
+      {
+        "v": "1.21",
+        "l": 1
+      },
+      {
+        "v": "1.21.1",
+        "l": 4
+      },
+      {
+        "v": "1.21",
+        "l": 4
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 1
+      },
+      {
+        "v": "1.21",
+        "l": 1
+      },
+      {
+        "v": "1.21.1",
+        "l": 4
+      },
+      {
+        "v": "1.21",
+        "l": 4
+      },
+      {
+        "v": "1.21.10",
+        "l": 6
+      },
+      {
+        "v": "1.21.10",
+        "l": 4
+      },
+      {
+        "v": "1.21.9",
+        "l": 6
+      },
+      {
+        "v": "1.21.8",
+        "l": 6
+      },
+      {
+        "v": "1.21.7",
+        "l": 6
+      },
+      {
+        "v": "1.21.5",
+        "l": 6
+      },
+      {
+        "v": "1.21.4",
+        "l": 6
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.9",
+      "fileId": 7182102,
+      "filename": "jei-1.21.10-neoforge-26.1.0.14.jar",
+      "releaseType": 2,
+      "gameVersionTypeId": 77784,
+      "modLoader": 6
+    }
+  },
+  {
+    "slug": "emi",
+    "found": true,
+    "id": 580555,
+    "name": "EMI",
+    "downloadCount": 37871789,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/emi",
+    "sourceUrl": "https://github.com/emilyploszaj/emi",
+    "mcVersions": [
+      "1.18.2",
+      "1.19",
+      "1.19.1",
+      "1.19.2",
+      "1.19.3",
+      "1.19.4",
+      "1.20",
+      "1.20.1",
+      "1.20.2",
+      "1.20.4",
+      "1.20.6",
+      "1.21",
+      "1.21.1"
+    ],
+    "loaders_on_target": [
+      4,
+      5,
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 4
+      },
+      {
+        "v": "1.21.1",
+        "l": 5
+      },
+      {
+        "v": "1.21",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 4
+      },
+      {
+        "v": "1.21",
+        "l": 5
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.1",
+      "fileId": 6420930,
+      "filename": "emi-1.1.22+1.21.1+fabric.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 5
+    }
+  },
+  {
+    "slug": "sodium",
+    "found": true,
+    "id": 394468,
+    "name": "Sodium",
+    "downloadCount": 113654910,
+    "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/sodium",
+    "sourceUrl": "https://github.com/CaffeineMC/sodium",
+    "mcVersions": [
+      "1.16.5",
+      "1.17.1",
+      "1.18.2",
+      "1.19",
+      "1.19.1",
+      "1.19.2",
+      "1.19.3",
+      "1.19.4",
+      "1.20",
+      "1.20.1",
+      "1.20.2",
+      "1.20.3",
+      "1.20.4",
+      "1.20.5",
+      "1.20.6",
+      "1.21",
+      "1.21.1",
+      "1.21.10",
+      "1.21.11",
+      "1.21.2",
+      "1.21.3",
+      "1.21.4",
+      "1.21.5",
+      "1.21.6",
+      "1.21.7",
+      "1.21.8",
+      "1.21.9",
+      "26.1",
+      "26.1.1",
+      "26.1.2"
+    ],
+    "loaders_on_target": [
+      4,
+      5,
+      6
+    ],
+    "loaders_on_1_21_x": [
+      {
+        "v": "1.21.11",
+        "l": 6
+      },
+      {
+        "v": "1.21.11",
+        "l": 4
+      },
+      {
+        "v": "1.21.11",
+        "l": 5
+      },
+      {
+        "v": "1.21.10",
+        "l": 6
+      },
+      {
+        "v": "1.21.9",
+        "l": 4
+      },
+      {
+        "v": "1.21.9",
+        "l": 5
+      },
+      {
+        "v": "1.21.10",
+        "l": 4
+      },
+      {
+        "v": "1.21.10",
+        "l": 5
+      },
+      {
+        "v": "1.21.8",
+        "l": 6
+      },
+      {
+        "v": "1.21.8",
+        "l": 4
+      },
+      {
+        "v": "1.21.8",
+        "l": 5
+      },
+      {
+        "v": "1.21.7",
+        "l": 4
+      },
+      {
+        "v": "1.21.7",
+        "l": 5
+      },
+      {
+        "v": "1.21.6",
+        "l": 4
+      },
+      {
+        "v": "1.21.6",
+        "l": 5
+      },
+      {
+        "v": "1.21.7",
+        "l": 6
+      },
+      {
+        "v": "1.21.6",
+        "l": 6
+      },
+      {
+        "v": "1.21.5",
+        "l": 6
+      },
+      {
+        "v": "1.21.5",
+        "l": 4
+      },
+      {
+        "v": "1.21.5",
+        "l": 5
+      },
+      {
+        "v": "1.21.4",
+        "l": 6
+      },
+      {
+        "v": "1.21.4",
+        "l": 4
+      },
+      {
+        "v": "1.21.4",
+        "l": 5
+      },
+      {
+        "v": "1.21.3",
+        "l": 6
+      },
+      {
+        "v": "1.21.3",
+        "l": 4
+      },
+      {
+        "v": "1.21.3",
+        "l": 5
+      },
+      {
+        "v": "1.21.2",
+        "l": 4
+      },
+      {
+        "v": "1.21.2",
+        "l": 5
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 4
+      },
+      {
+        "v": "1.21.1",
+        "l": 5
+      },
+      {
+        "v": "1.21",
+        "l": 4
+      },
+      {
+        "v": "1.21",
+        "l": 5
+      },
+      {
+        "v": "1.21.4",
+        "l": 6
+      },
+      {
+        "v": "1.21.4",
+        "l": 4
+      },
+      {
+        "v": "1.21.4",
+        "l": 5
+      },
+      {
+        "v": "1.21.2",
+        "l": 6
+      },
+      {
+        "v": "1.21.3",
+        "l": 4
+      },
+      {
+        "v": "1.21.3",
+        "l": 5
+      },
+      {
+        "v": "1.21.2",
+        "l": 4
+      },
+      {
+        "v": "1.21.2",
+        "l": 5
+      },
+      {
+        "v": "1.21.3",
+        "l": 6
+      },
+      {
+        "v": "1.21.2",
+        "l": 6
+      },
+      {
+        "v": "1.21.1",
+        "l": 4
+      },
+      {
+        "v": "1.21.1",
+        "l": 5
+      },
+      {
+        "v": "1.21.1",
+        "l": 6
+      },
+      {
+        "v": "1.21",
+        "l": 4
+      },
+      {
+        "v": "1.21",
+        "l": 5
+      }
+    ],
+    "latest_file_1_21_x": {
+      "gameVersion": "1.21.9",
+      "fileId": 7207593,
+      "filename": "sodium-fabric-0.7.3+mc1.21.10.jar",
+      "releaseType": 1,
+      "gameVersionTypeId": 77784,
+      "modLoader": 5
+    }
+  }
+]

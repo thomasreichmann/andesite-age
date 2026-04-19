@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Resolve a CurseForge modpack manifest.json into a clean per-mod JSON list.
+#
+# Usage: scripts/resolve-manifest <manifest.json> > out.json
+#
+# Output: JSON array of { modId, fileId, required, slug, name, summary,
+#                         categories[], primaryCategory, websiteUrl,
+#                         downloadCount, latestGameVersions[] }
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CF_API="$PROJECT_ROOT/scripts/cf-api"
+
+manifest="${1:?manifest.json path required}"
+[[ -f "$manifest" ]] || { echo "manifest not found: $manifest" >&2; exit 1; }
+
+# Extract files[].projectID + fileID + required as a small lookup table
+files_json=$(jq -c '.files | map({modId: .projectID, fileId: .fileID, required: .required})' "$manifest")
+
+# Build chunks of 50 project IDs (CF API limit) and fetch each.
+# Stream each chunk's mod records to a temp NDJSON file, then collect into one
+# array. (bash 3.2 lacks mapfile; passing JSON via --argjson hits ARG_MAX.)
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+ndjson="$tmpdir/mods.ndjson"
+: > "$ndjson"
+
+while IFS= read -r chunk; do
+  [[ -z "$chunk" ]] && continue
+  "$CF_API" "/v1/mods" \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d "{\"modIds\": $chunk}" \
+    | jq -c '.data[]' >> "$ndjson"
+done < <(jq -c '[.[].modId] | _nwise(50)' <<<"$files_json")
+
+all_mods_file="$tmpdir/all.json"
+jq -s '.' "$ndjson" > "$all_mods_file"
+
+# Join: per-file metadata + resolved mod metadata.
+# Use --slurpfile to avoid ARG_MAX on large mod arrays.
+jq --slurpfile mods_arr "$all_mods_file" '
+  ($mods_arr[0] | map({(.id|tostring): .}) | add) as $byId
+  | map(
+      . as $f
+      | ($byId[($f.modId|tostring)] // null) as $m
+      | {
+          modId: $f.modId,
+          fileId: $f.fileId,
+          required: $f.required,
+          slug: ($m.slug // null),
+          name: ($m.name // null),
+          summary: ($m.summary // null),
+          categories: ($m.categories // [] | map(.name)),
+          primaryCategoryId: ($m.primaryCategoryId // null),
+          websiteUrl: ($m.links.websiteUrl // null),
+          sourceUrl: ($m.links.sourceUrl // null),
+          downloadCount: ($m.downloadCount // 0),
+          latestGameVersions: ($m.latestFilesIndexes // [] | map(.gameVersion) | unique)
+        }
+    )
+' <<<"$files_json"

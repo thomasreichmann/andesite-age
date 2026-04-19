@@ -1,0 +1,50 @@
+# Create-ecosystem shortlist to verify for 1.21.x availability.
+# One slug per line; lines starting with # are comments; first token is the CF slug.
+# Grouping is for humans — the verifier treats all uncommented lines uniformly.
+
+# --- Tier 1: consensus picks ---
+create
+create-steam-n-rails
+create-new-age                 # absent from ref packs, but a must-check for Create late-game
+copycats                       # "Create: Copycats+" — massive omission from ref packs
+
+# --- Tier 2: strong 2-pack picks & frequently-discussed addons ---
+create-central-kitchen
+create-deco
+create-stuff-additions
+createaddition                 # Create Crafts & Additions
+create-chunkloading
+create-enchantment-industry    # only in PW but widely loved
+create-jetpack
+
+# --- Tier 3: flavor/niche but worth checking ---
+create-confectionery
+create-big-cannons
+create-liquid-fuel
+create-recycle-everything
+create-additional-recipes
+create-power-loader
+create-extended-cogs
+create-encased
+create-alloyed
+interiors                      # "Create: Interiors"
+rechiseled-create
+
+# --- Create-adjacent bridges / integrations ---
+ars-creo                       # Ars Nouveau <-> Create
+ars-nouveau                    # for vanilla+ magic presence check
+compressedcreativity           # Create <-> PneumaticCraft
+cccbridge                      # Create <-> CC:Tweaked
+custom-machinery               # Create support available
+
+# --- Building / decor that showed up in ref packs ---
+daves-building-extended
+chisels-bits
+
+# --- Auxiliary (not Create-specific but table-stakes) ---
+kubejs
+jade
+jei                            # compare against emi
+emi
+sodium                         # 1.21 naming on Forge platforms varies — worth checking
+create-jetpack

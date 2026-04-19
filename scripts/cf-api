@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Thin wrapper around the CurseForge API.
+# Reads CF_API_KEY from .env.local at the project root.
+#
+# Usage:
+#   scripts/cf-api <path> [extra curl args...]
+#
+# Examples:
+#   scripts/cf-api "/v1/mods/search?gameId=432&classId=4471&searchFilter=CABIN"
+#   scripts/cf-api "/v1/mods" -X POST -H "Content-Type: application/json" -d '{"modIds":[238222]}'
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$PROJECT_ROOT/.env.local"
+
+: "${CF_API_KEY:?CF_API_KEY not set in .env.local}"
+
+path="$1"
+shift
+
+curl -sS \
+  -H "Accept: application/json" \
+  -H "x-api-key: ${CF_API_KEY}" \
+  "$@" \
+  "https://api.curseforge.com${path}"
