@@ -1,0 +1,25 @@
+services:
+  validate:
+    image: itzg/minecraft-server:java21
+    container_name: andesite-validate
+    environment:
+      EULA: "TRUE"
+      TYPE: MODRINTH
+      MODRINTH_MODPACK: /modpacks/pack.mrpack
+      MODRINTH_FORCE_SYNCHRONIZE: "true"
+      REMOVE_OLD_MODS: "true"
+      MEMORY: 4G
+      ONLINE_MODE: "FALSE"
+      GUI: "FALSE"
+      USE_AIKAR_FLAGS: "true"
+      STOP_SERVER_ANNOUNCE_DELAY: "0"
+    volumes:
+      - "./pack.mrpack:/modpacks/pack.mrpack:ro"
+      - "validation_data:/data"
+    ports:
+      - "25565:25565"
+    tty: true
+    stdin_open: true
+
+volumes:
+  validation_data:

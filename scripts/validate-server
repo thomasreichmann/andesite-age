@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# Headless validation of the current packwiz source against a NeoForge dedicated
+# server via itzg/minecraft-server. Exports the latest .mrpack, boots the server,
+# waits for "Done (...)! For help", scans logs for errors, tears down.
+#
+# Usage:
+#   scripts/validate-server              # fast: reuses the validation_data volume
+#   scripts/validate-server --clean      # wipe the volume first (pristine boot)
+#   scripts/validate-server --keep-up    # leave the server running after validation
+#
+# Exits 0 on clean boot, 1 on timeout or errors detected.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PACK_DIR="$REPO_ROOT/pack"
+COMPOSE_DIR="$REPO_ROOT/server-validation"
+MRPACK_OUT="$COMPOSE_DIR/pack.mrpack"
+LOG_DIR="$COMPOSE_DIR/logs"
+READY_TIMEOUT="${READY_TIMEOUT:-600}"
+READY_MARKER='Done \([0-9.]+s\)! For help'
+
+CLEAN=0
+KEEP_UP=0
+for arg in "$@"; do
+    case "$arg" in
+        --clean)    CLEAN=1 ;;
+        --keep-up)  KEEP_UP=1 ;;
+        -h|--help)
+            sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'
+            exit 0 ;;
+        *) echo "unknown flag: $arg" >&2; exit 2 ;;
+    esac
+done
+
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/validate-$(date +%Y%m%d-%H%M%S).log"
+
+echo "==> exporting current packwiz source to $MRPACK_OUT"
+(cd "$PACK_DIR" && packwiz mr export -o "$MRPACK_OUT" >/dev/null)
+
+cd "$COMPOSE_DIR"
+
+if [[ "$CLEAN" == "1" ]]; then
+    echo "==> wiping validation_data volume"
+    docker compose down -v >/dev/null 2>&1 || true
+fi
+
+echo "==> bringing up itzg server (container: andesite-validate)"
+docker compose up -d
+
+echo "==> waiting up to ${READY_TIMEOUT}s for 'Done (...)! For help'"
+start=$(date +%s)
+ready=0
+while true; do
+    elapsed=$(( $(date +%s) - start ))
+    if (( elapsed > READY_TIMEOUT )); then
+        echo "==> TIMEOUT after ${elapsed}s" >&2
+        break
+    fi
+    if docker compose logs --no-log-prefix validate 2>/dev/null | grep -qE "$READY_MARKER"; then
+        echo "==> server ready in ${elapsed}s"
+        ready=1
+        break
+    fi
+    if [[ "$(docker compose ps -q validate 2>/dev/null)" == "" ]] || \
+       [[ "$(docker inspect -f '{{.State.Status}}' andesite-validate 2>/dev/null)" == "exited" ]]; then
+        echo "==> container exited before becoming ready" >&2
+        break
+    fi
+    sleep 3
+done
+
+echo "==> dumping logs to $LOG_FILE"
+docker compose logs --no-log-prefix validate > "$LOG_FILE" 2>&1 || true
+
+echo "==> scanning for errors"
+# Match only log-level ERROR/FATAL lines (one line per real error), not stack
+# trace `at ...` spam. Strip ANSI color before matching.
+ANSI='\x1b\[[0-9;]*[a-zA-Z]'
+ERR_HITS=$(sed -E "s/$ANSI//g" "$LOG_FILE" | grep -E '\[[^]]*/(ERROR|FATAL)\]' || true)
+# Root-cause hints to show alongside — Caused by / Exception message lines.
+CAUSE_HITS=$(sed -E "s/$ANSI//g" "$LOG_FILE" | grep -E '^(Caused by:|[A-Za-z][A-Za-z0-9_.]*Exception:)' || true)
+
+if [[ "$KEEP_UP" == "1" ]]; then
+    echo "==> --keep-up: leaving container running. stop with: docker compose -f $COMPOSE_DIR/docker-compose.yml down"
+else
+    echo "==> stopping container"
+    docker compose stop >/dev/null 2>&1 || true
+    docker compose down >/dev/null 2>&1 || true
+fi
+
+echo
+echo "============================================================"
+echo " VALIDATION SUMMARY"
+echo "============================================================"
+echo " ready    : $([[ $ready == 1 ]] && echo yes || echo NO)"
+echo " log file : $LOG_FILE"
+echo " errors   : $([[ -z "$ERR_HITS" ]] && echo none || echo "$(echo "$ERR_HITS" | wc -l | tr -d ' ') line(s)")"
+echo "============================================================"
+
+if [[ -n "$ERR_HITS" ]]; then
+    echo
+    echo "----- ERROR/FATAL log lines -----"
+    echo "$ERR_HITS" | head -40
+    echo "---------------------------------"
+fi
+if [[ -n "$CAUSE_HITS" ]]; then
+    echo
+    echo "----- exception / caused-by hints -----"
+    echo "$CAUSE_HITS" | head -20
+    echo "---------------------------------------"
+fi
+
+if [[ $ready == 0 || -n "$ERR_HITS" ]]; then
+    exit 1
+fi
