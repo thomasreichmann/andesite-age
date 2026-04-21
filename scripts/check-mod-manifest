@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Verify the set of mods in pack/mods/ matches server-validation/expected-mods.tsv
+# (slug + side) and that pack.toml still pins the expected MC + NeoForge versions.
+#
+# Exits 0 on match, 1 on any drift.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PACK_DIR="$REPO_ROOT/pack"
+TSV="$REPO_ROOT/server-validation/expected-mods.tsv"
+EXPECT_MC="1.21.1"
+EXPECT_NEOFORGE="21.1.227"
+
+if [[ ! -f "$TSV" ]]; then
+    echo "missing expected-mods manifest: $TSV" >&2
+    exit 1
+fi
+
+fail=0
+
+actual=$(
+    for f in "$PACK_DIR"/mods/*.pw.toml; do
+        slug=$(basename "$f" .pw.toml)
+        side=$(sed -nE 's/^side = "([^"]+)".*/\1/p' "$f")
+        printf '%s\t%s\n' "$slug" "$side"
+    done | sort
+)
+
+expected=$(grep -vE '^\s*(#|$)' "$TSV" | sort)
+
+if [[ "$actual" != "$expected" ]]; then
+    echo "mod manifest drift vs expected-mods.tsv:" >&2
+    diff <(echo "$expected") <(echo "$actual") | sed 's/^/  /' >&2
+    fail=1
+fi
+
+mc=$(sed -nE 's/^minecraft = "([^"]+)".*/\1/p' "$PACK_DIR/pack.toml")
+nf=$(sed -nE 's/^neoforge = "([^"]+)".*/\1/p' "$PACK_DIR/pack.toml")
+if [[ "$mc" != "$EXPECT_MC" ]]; then
+    echo "minecraft pin drift: expected $EXPECT_MC, got '$mc'" >&2
+    fail=1
+fi
+if [[ "$nf" != "$EXPECT_NEOFORGE" ]]; then
+    echo "neoforge pin drift: expected $EXPECT_NEOFORGE, got '$nf'" >&2
+    fail=1
+fi
+
+if (( fail == 1 )); then
+    exit 1
+fi
+
+count=$(echo "$actual" | wc -l | tr -d ' ')
+echo "mod manifest OK ($count mods; mc=$mc, neoforge=$nf)"

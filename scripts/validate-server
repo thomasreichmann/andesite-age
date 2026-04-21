@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Headless validation of the current packwiz source against a NeoForge dedicated
 # server via itzg/minecraft-server. Exports the latest .mrpack, boots the server,
-# waits for "Done (...)! For help", scans logs for errors, tears down.
+# waits for RCON to accept commands, scans logs for errors, tears down.
 #
 # Usage:
 #   scripts/validate-server              # fast: reuses the validation_data volume
@@ -17,8 +17,8 @@ PACK_DIR="$REPO_ROOT/pack"
 COMPOSE_DIR="$REPO_ROOT/server-validation"
 MRPACK_OUT="$COMPOSE_DIR/pack.mrpack"
 LOG_DIR="$COMPOSE_DIR/logs"
+ALLOWLIST="$COMPOSE_DIR/known-issues.txt"
 READY_TIMEOUT="${READY_TIMEOUT:-600}"
-READY_MARKER='Done \([0-9.]+s\)! For help'
 
 CLEAN=0
 KEEP_UP=0
@@ -36,8 +36,30 @@ done
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/validate-$(date +%Y%m%d-%H%M%S).log"
 
-echo "==> exporting current packwiz source to $MRPACK_OUT"
-(cd "$PACK_DIR" && packwiz mr export -o "$MRPACK_OUT" >/dev/null)
+echo "==> checking mod manifest + version pins"
+"$REPO_ROOT/scripts/check-mod-manifest"
+
+# Hash pack source to skip re-export when nothing changed. Hashes content
+# of pack.toml, index.toml, and every .pw.toml (mtime isn't portable).
+pack_source_hash() {
+    {
+        cat "$PACK_DIR/pack.toml" "$PACK_DIR/index.toml"
+        find "$PACK_DIR/mods" -name '*.pw.toml' -print0 | sort -z | xargs -0 cat
+    } | shasum -a 256 | awk '{print $1}'
+}
+HASH_FILE="$COMPOSE_DIR/.last-export-hash"
+CURRENT_HASH=$(pack_source_hash)
+
+if [[ -f "$MRPACK_OUT" && -f "$HASH_FILE" && "$(cat "$HASH_FILE")" == "$CURRENT_HASH" ]]; then
+    echo "==> pack source unchanged; reusing $MRPACK_OUT"
+else
+    echo "==> exporting current packwiz source to $MRPACK_OUT"
+    (cd "$PACK_DIR" && packwiz refresh >/dev/null && packwiz mr export -o "$MRPACK_OUT" >/dev/null)
+    echo "$CURRENT_HASH" > "$HASH_FILE"
+fi
+
+echo "==> verifying mrpack sidedness"
+"$REPO_ROOT/scripts/check-sidedness" "$MRPACK_OUT"
 
 cd "$COMPOSE_DIR"
 
@@ -47,9 +69,13 @@ if [[ "$CLEAN" == "1" ]]; then
 fi
 
 echo "==> bringing up itzg server (container: andesite-validate)"
+# Capture boot timestamp so `docker compose logs --since` only returns lines
+# from THIS boot — without this, allowlisted-error counts grow on each
+# subsequent run against a long-lived stopped container.
+BOOT_ISO=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 docker compose up -d
 
-echo "==> waiting up to ${READY_TIMEOUT}s for 'Done (...)! For help'"
+echo "==> waiting up to ${READY_TIMEOUT}s for rcon-cli to respond"
 start=$(date +%s)
 ready=0
 while true; do
@@ -58,8 +84,11 @@ while true; do
         echo "==> TIMEOUT after ${elapsed}s" >&2
         break
     fi
-    if docker compose logs --no-log-prefix validate 2>/dev/null | grep -qE "$READY_MARKER"; then
-        echo "==> server ready in ${elapsed}s"
+    # rcon-cli exits 0 only when the server accepts the command — a
+    # truthful "commands-accepted" signal, unlike the log marker which
+    # can fire before modded boots finish.
+    if docker compose exec -T validate rcon-cli list >/dev/null 2>&1; then
+        echo "==> server ready in ${elapsed}s (rcon responded)"
         ready=1
         break
     fi
@@ -68,35 +97,97 @@ while true; do
         echo "==> container exited before becoming ready" >&2
         break
     fi
-    sleep 3
+    sleep 2
 done
 
+if [[ $ready == 1 ]]; then
+    echo "==> running post-boot probes via rcon-cli"
+    # `reload` re-evaluates datapacks and surfaces recipe/tag/advancement
+    # parse failures that didn't fire on initial load. `forceload add ~ ~`
+    # pins a chunk at the command origin (spawn) to exercise the
+    # worldgen path. Failures here flow into the standard log scan.
+    docker compose exec -T validate rcon-cli reload >/dev/null 2>&1 || true
+    docker compose exec -T validate rcon-cli forceload add '~' '~' >/dev/null 2>&1 || true
+    # Let the reload finish emitting log lines before we dump.
+    sleep 2
+fi
+
 echo "==> dumping logs to $LOG_FILE"
-docker compose logs --no-log-prefix validate > "$LOG_FILE" 2>&1 || true
+docker compose logs --no-log-prefix --since "$BOOT_ISO" validate > "$LOG_FILE" 2>&1 || true
 
 echo "==> scanning for errors"
-# Match only log-level ERROR/FATAL lines (one line per real error), not stack
-# trace `at ...` spam. Strip ANSI color before matching.
+# Single-pass scan: strip ANSI, split into ERROR/FATAL / Caused-by / WARN-tier
+# parse-failure streams. Dedupes repeats in one pass (same recipe error firing
+# per tick across overworld/nether/end would otherwise inflate the count).
 ANSI='\x1b\[[0-9;]*[a-zA-Z]'
-ERR_HITS=$(sed -E "s/$ANSI//g" "$LOG_FILE" | grep -E '\[[^]]*/(ERROR|FATAL)\]' || true)
-# Root-cause hints to show alongside — Caused by / Exception message lines.
-CAUSE_HITS=$(sed -E "s/$ANSI//g" "$LOG_FILE" | grep -E '^(Caused by:|[A-Za-z][A-Za-z0-9_.]*Exception:)' || true)
+WARN_VERBS='(Parsing error loading|Failed to load|Couldn'"'"'t load|Couldn'"'"'t parse)'
+WARN_NOUNS='(recipe|advancement|loot table|tag)'
+SCAN_TMP=$(mktemp -d)
+trap 'rm -rf "$SCAN_TMP"' EXIT
+touch "$SCAN_TMP/err" "$SCAN_TMP/cause" "$SCAN_TMP/warn"
+sed -E "s/$ANSI//g" "$LOG_FILE" | awk \
+    -v err="$SCAN_TMP/err" \
+    -v cause="$SCAN_TMP/cause" \
+    -v warn="$SCAN_TMP/warn" \
+    -v verbs="$WARN_VERBS" \
+    -v nouns="$WARN_NOUNS" '
+    BEGIN { re_warn = verbs ".*" nouns }
+    /\[[^]]*\/(ERROR|FATAL)\]/ && !seen_err[$0]++ { print > err; next }
+    /^Caused by:/ && !seen_cause[$0]++ { print > cause; next }
+    /\[[^]]*\/(WARN|WARNING)\]/ && $0 ~ re_warn && !seen_warn[$0]++ { print > warn }
+'
+ERR_HITS_RAW=$(cat "$SCAN_TMP/err")
+CAUSE_HITS=$(cat "$SCAN_TMP/cause")
+WARN_HITS_RAW=$(cat "$SCAN_TMP/warn")
 
-if [[ "$KEEP_UP" == "1" ]]; then
-    echo "==> --keep-up: leaving container running. stop with: docker compose -f $COMPOSE_DIR/docker-compose.yml down"
-else
-    echo "==> stopping container"
-    docker compose stop >/dev/null 2>&1 || true
-    docker compose down >/dev/null 2>&1 || true
+# Apply known-issue allowlist to ERROR and WARN streams. A pattern is
+# "stale" only if it matches nothing across ALL streams (i.e. upstream
+# fix — delete the entry). Matches are collected, survivors propagate.
+ALLOWED_HITS=""
+STALE_PATTERNS=""
+ERR_HITS="$ERR_HITS_RAW"
+WARN_HITS="$WARN_HITS_RAW"
+if [[ -f "$ALLOWLIST" ]]; then
+    while IFS= read -r pattern || [[ -n "$pattern" ]]; do
+        [[ -z "$pattern" || "$pattern" == \#* ]] && continue
+        matched_any=0
+        for stream_var in ERR_HITS WARN_HITS; do
+            stream_val="${!stream_var}"
+            [[ -z "$stream_val" ]] && continue
+            matched=$(echo "$stream_val" | grep -E "$pattern" || true)
+            if [[ -n "$matched" ]]; then
+                ALLOWED_HITS+="$matched"$'\n'
+                filtered=$(echo "$stream_val" | grep -vE "$pattern" || true)
+                printf -v "$stream_var" '%s' "$filtered"
+                matched_any=1
+            fi
+        done
+        (( matched_any == 0 )) && STALE_PATTERNS+="$pattern"$'\n'
+    done < "$ALLOWLIST"
 fi
+
+# Crash-reports presence is a hard failure regardless of log grep verdict.
+# Must run while container is still up (before teardown below).
+CRASH_REPORTS=""
+if [[ "$(docker compose ps -q validate 2>/dev/null)" != "" ]]; then
+    CRASH_REPORTS=$(docker compose exec -T validate sh -c 'ls -1 /data/crash-reports 2>/dev/null' 2>/dev/null | grep -v '^$' || true)
+fi
+
+err_count() {
+    if [[ -z "$1" ]]; then echo 0; return; fi
+    printf '%s\n' "$1" | sed '/^$/d' | wc -l | tr -d ' '
+}
 
 echo
 echo "============================================================"
 echo " VALIDATION SUMMARY"
 echo "============================================================"
-echo " ready    : $([[ $ready == 1 ]] && echo yes || echo NO)"
-echo " log file : $LOG_FILE"
-echo " errors   : $([[ -z "$ERR_HITS" ]] && echo none || echo "$(echo "$ERR_HITS" | wc -l | tr -d ' ') line(s)")"
+echo " ready       : $([[ $ready == 1 ]] && echo yes || echo NO)"
+echo " log file    : $LOG_FILE"
+echo " errors      : $(err_count "$ERR_HITS") line(s)"
+echo " warn-parse  : $(err_count "$WARN_HITS") line(s)"
+echo " allowlisted : $(err_count "$ALLOWED_HITS") line(s)"
+echo " crash dumps : $(err_count "$CRASH_REPORTS") file(s)"
 echo "============================================================"
 
 if [[ -n "$ERR_HITS" ]]; then
@@ -105,13 +196,41 @@ if [[ -n "$ERR_HITS" ]]; then
     echo "$ERR_HITS" | head -40
     echo "---------------------------------"
 fi
+if [[ -n "$WARN_HITS" ]]; then
+    echo
+    echo "----- WARN-tier recipe/tag/advancement load failures -----"
+    echo "$WARN_HITS" | head -40
+    echo "-----------------------------------------------------------"
+fi
 if [[ -n "$CAUSE_HITS" ]]; then
     echo
     echo "----- exception / caused-by hints -----"
     echo "$CAUSE_HITS" | head -20
     echo "---------------------------------------"
 fi
+if [[ -n "$CRASH_REPORTS" ]]; then
+    echo
+    echo "----- /data/crash-reports contents -----"
+    echo "$CRASH_REPORTS"
+    echo "-----------------------------------------"
+fi
+if [[ -n "$STALE_PATTERNS" ]]; then
+    echo
+    echo "----- stale allowlist entries (matched 0 lines, consider removing) -----"
+    echo -n "$STALE_PATTERNS"
+    echo "------------------------------------------------------------------------"
+fi
 
-if [[ $ready == 0 || -n "$ERR_HITS" ]]; then
+# Teardown runs AFTER the summary and is backgrounded so wall-clock
+# doesn't pay for docker's ~3-5s stop latency. Next `up -d` naturally
+# waits for stop to finish. `--clean` already ran `down -v` up top.
+if [[ "$KEEP_UP" == "1" ]]; then
+    echo
+    echo "==> --keep-up: leaving container running. stop with: docker compose -f $COMPOSE_DIR/docker-compose.yml stop"
+else
+    ( docker compose stop >/dev/null 2>&1 & ) >/dev/null 2>&1
+fi
+
+if [[ $ready == 0 || -n "$ERR_HITS" || -n "$WARN_HITS" || -n "$CRASH_REPORTS" ]]; then
     exit 1
 fi

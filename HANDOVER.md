@@ -14,10 +14,13 @@ Indexed via `MEMORY.md`. Key ones for this session:
 - `project_create_plus.md` — pack thesis and the two filter questions
   that gate every mod add (*does this trivialize Create?* / *does this
   break vanilla world feel?*)
-- `project_known_mod_issues.md` — the two upstream errors
-  (`createdeco:placard` recipe, DistCleaner AbstractClientPlayer) are
-  known and non-blocking; don't re-diagnose
 - `user_background.md`, `feedback_open_to_forking.md`
+
+Known upstream errors (`createdeco:placard` recipe, DistCleaner
+AbstractClientPlayer) now live in
+`server-validation/known-issues.txt` — the validation script
+allowlists them automatically and reports stale entries if they stop
+firing.
 
 ## Where things stand
 
@@ -37,17 +40,37 @@ Indexed via `MEMORY.md`. Key ones for this session:
 
 `scripts/validate-server` is the dev loop. It:
 
-1. Runs `packwiz mr export -o server-validation/pack.mrpack`
-2. `docker compose up -d` in `server-validation/` (itzg +
-   `TYPE=MODRINTH`, local file mount; reads loader + MC version from
-   the mrpack)
-3. Waits up to 600s for `Done (…)! For help`
-4. Dumps logs to `server-validation/logs/`, scans for `ERROR|FATAL`
-5. Tears down (`--keep-up` to leave running; `--clean` to wipe the
-   named volume first)
+1. `scripts/check-mod-manifest` — diffs current `pack/mods/*.pw.toml`
+   against `server-validation/expected-mods.tsv` and asserts MC +
+   NeoForge version pins in `pack/pack.toml`.
+2. Hashes pack source; runs `packwiz refresh` + `packwiz mr export`
+   only if the hash changed (reuses `server-validation/pack.mrpack`
+   otherwise — `.last-export-hash` is the cache).
+3. `scripts/check-sidedness` — confirms every `.pw.toml` mod is tagged
+   in the exported `modrinth.index.json` with `env.client`/`env.server`
+   matching its `side` field.
+4. `docker compose up -d` in `server-validation/` (itzg +
+   `TYPE=MODRINTH`; RCON enabled with an ephemeral local password).
+5. Polls `rcon-cli list` every 2s up to 600s — readiness signal is
+   "commands accepted", not the log marker (which fires too early on
+   modded boots).
+6. Runs post-boot probes: `rcon-cli reload` (re-evaluates datapacks,
+   surfaces recipe/tag parse failures) and `rcon-cli forceload add ~ ~`
+   (exercises chunk-gen).
+7. Dumps logs (only since this boot, via `--since`), single-pass awk
+   split into ERROR/FATAL, WARN-tier recipe/tag/advancement failures,
+   and `Caused by:` hints. Dedupes in the same pass.
+8. Subtracts matches against `server-validation/known-issues.txt`
+   (regex allowlist). Prints a "stale allowlist" warning for patterns
+   that matched nothing.
+9. Checks `/data/crash-reports` in the container — any file there is a
+   hard failure.
+10. Teardown is backgrounded (`docker compose stop &`) so the next run
+    waits for stop implicitly. `--keep-up` leaves it running;
+    `--clean` does `down -v` up front.
 
-Treat the pack as passing when only the two known-issue errors appear.
-Any *new* error line is a real regression.
+Exit 0 iff: ready, no unallowed ERROR/FATAL, no WARN-tier parse
+failures, no crash reports. Any *new* error line is a real regression.
 
 **Requires Docker daemon running.** On macOS: Docker Desktop must be
 launched.
@@ -103,4 +126,5 @@ These deferred from the previous handover, still unanswered:
   pack name, or the loader/MC version choice — all locked.
 - The validation pipeline design. It works; extend it if needed, don't
   rewrite.
-- The two known upstream errors. See `project_known_mod_issues.md`.
+- The two known upstream errors. See
+  `server-validation/known-issues.txt`.

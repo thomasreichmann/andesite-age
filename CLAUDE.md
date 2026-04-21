@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-An authored Minecraft 1.21.1 NeoForge modpack ("Andesite Age") managed with **packwiz** — not a conventional codebase. Source of truth is the packwiz metadata under `pack/`; the `.mrpack` is build output. Pack thesis and mod-vetting filters live in auto-loaded memory (`project_create_plus.md`). Current state and open questions: `HANDOVER.md`.
+An authored Minecraft 1.21.1 NeoForge modpack ("Andesite Age") managed with **packwiz** — not a conventional codebase. Source of truth is the packwiz metadata under `pack/`; the `.mrpack` is build output. Pack thesis and mod-vetting filters live in auto-loaded memory (`project_create_plus.md`). 
 
 ## Commands worth knowing
 
@@ -23,7 +23,11 @@ An authored Minecraft 1.21.1 NeoForge modpack ("Andesite Age") managed with **pa
 
 `scripts/validate-server` catches server-side regressions (recipe JSON, KubeJS scripts, dep mismatches, registry collisions) without needing the user's Windows Prism box. It does not cover client-only concerns — rendering, UI, tooltip overlays need a human client run.
 
-Known upstream non-blocking errors are documented in `project_known_mod_issues.md` (auto-loaded). A run surfacing only those is passing; any new ERROR line is a real regression.
+Known upstream non-blocking errors live in `server-validation/known-issues.txt` (regex allowlist, in-repo). The script subtracts matches from the real-error count and warns when an allowlist entry matches nothing (so fixed-upstream bugs self-expire). A run whose `errors` and `warn-parse` lines are both 0 is passing; any entry that survives the allowlist is a real regression.
+
+Companion helpers wired into the same script:
+- `scripts/check-sidedness` — verifies every `.pw.toml` `side` tag is preserved through `packwiz mr export` into `modrinth.index.json`'s `env` block.
+- `scripts/check-mod-manifest` — diffs `pack/mods/` against `server-validation/expected-mods.tsv` and asserts MC/NeoForge pins in `pack/pack.toml`. Update the TSV when adding/removing a mod.
 
 ## Distribution plan
 

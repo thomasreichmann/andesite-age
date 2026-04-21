@@ -13,6 +13,12 @@ services:
       GUI: "FALSE"
       USE_AIKAR_FLAGS: "true"
       STOP_SERVER_ANNOUNCE_DELAY: "0"
+      # RCON: used by scripts/validate-server for a truthful readiness
+      # probe (the "Done (...)" log marker fires before the server
+      # accepts commands on modded boots). Password is ephemeral —
+      # container is never exposed outside localhost.
+      RCON: "true"
+      RCON_PASSWORD: "andesite-dev"
     volumes:
       - "./pack.mrpack:/modpacks/pack.mrpack:ro"
       - "validation_data:/data"

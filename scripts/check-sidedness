@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+# Verify every mod in pack/mods/*.pw.toml is exported in pack.mrpack with
+# an `env` block matching its `side` field. Catches packwiz export
+# regressions that would otherwise ship client-only mods to the server.
+#
+# Usage: scripts/check-sidedness <path-to-pack.mrpack>
+# Exits 0 on match, 1 on any mismatch or missing entry.
+
+import json
+import re
+import sys
+import zipfile
+from pathlib import Path
+
+EXPECTED = {
+    "client": {"client": "required", "server": "unsupported"},
+    "server": {"client": "unsupported", "server": "required"},
+    "both":   {"client": "required", "server": "required"},
+}
+
+SIDE_RE = re.compile(r'^side\s*=\s*"([^"]+)"', re.MULTILINE)
+FILE_RE = re.compile(r'^filename\s*=\s*"([^"]+)"', re.MULTILINE)
+
+
+def main(argv):
+    if len(argv) != 2:
+        print("usage: check-sidedness <pack.mrpack>", file=sys.stderr)
+        return 2
+    mrpack = Path(argv[1])
+    repo_root = Path(__file__).resolve().parent.parent
+    mods_dir = repo_root / "pack" / "mods"
+
+    expected_by_filename = {}
+    for pwtoml in sorted(mods_dir.glob("*.pw.toml")):
+        text = pwtoml.read_text()
+        side_m = SIDE_RE.search(text)
+        file_m = FILE_RE.search(text)
+        if not side_m or not file_m:
+            print(f"[skip] {pwtoml.name}: missing side or filename", file=sys.stderr)
+            continue
+        side = side_m.group(1)
+        if side not in EXPECTED:
+            print(f"[fail] {pwtoml.name}: unknown side '{side}'", file=sys.stderr)
+            return 1
+        expected_by_filename[file_m.group(1)] = (pwtoml.name, side)
+
+    with zipfile.ZipFile(mrpack) as z:
+        with z.open("modrinth.index.json") as f:
+            index = json.load(f)
+
+    actual_by_basename = {Path(f["path"]).name: f.get("env", {}) for f in index["files"]}
+
+    failures = []
+    for filename, (pwname, side) in expected_by_filename.items():
+        want = EXPECTED[side]
+        got = actual_by_basename.get(filename)
+        if got is None:
+            failures.append(f"{pwname}: '{filename}' not in mrpack")
+        elif got != want:
+            failures.append(
+                f"{pwname} (side={side}): expected env={want}, got env={got}"
+            )
+
+    if failures:
+        print("sidedness mismatches:", file=sys.stderr)
+        for line in failures:
+            print(f"  - {line}", file=sys.stderr)
+        return 1
+    print(f"sidedness OK ({len(expected_by_filename)} mods checked)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

@@ -1,0 +1,19 @@
+# Known-issue allowlist for scripts/validate-server.
+#
+# One extended-regex pattern per line. Lines starting with '#' and blank
+# lines are ignored. A log line counted as ERROR/FATAL that matches ANY
+# pattern here is subtracted from the real-error count — the run still
+# passes if only allowlisted errors appear.
+#
+# Stale entries (patterns that match zero lines on a run) are reported as
+# warnings so fixed-upstream bugs get cleaned up automatically.
+
+# createdeco-2.1.3 ships a placard recipe using {"id":"..."} instead of
+# "item"/"tag"/array. Breaks one crafting recipe. Upstream bug; re-check
+# when bumping createdeco.
+Parsing error loading recipe createdeco:placard
+
+# RuntimeDistCleaner rejects AbstractClientPlayer on DEDICATED_SERVER as
+# designed — logged as ERROR but not fatal. Source mod unpinned; likely
+# an unguarded @OnlyIn reference somewhere in the Create addon set.
+RuntimeDistCleaner.*AbstractClientPlayer

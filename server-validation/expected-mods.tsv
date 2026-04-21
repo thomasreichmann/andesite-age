@@ -1,0 +1,22 @@
+# Baseline of mods that SHOULD be in pack/mods/. scripts/check-mod-manifest
+# diffs this against the current .pw.toml set and fails on drift.
+#
+# Format: slug<TAB>side — one per line, '#' comments and blank lines ignored.
+# Slug is the basename of the .pw.toml file (pack/mods/<slug>.pw.toml).
+# Regenerate after packwiz add/remove by editing this file to match.
+#
+# slug	side
+copycats	both
+create	both
+create-central-kitchen	both
+create-deco	both
+create-dragons-plus	both
+create-enchantment-industry	both
+create-new-age	both
+create-stuff-additions	both
+createaddition	both
+emi	client
+jade	both
+kubejs	both
+rhino	both
+sodium	client
