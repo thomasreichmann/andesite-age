@@ -10,7 +10,7 @@ An authored Minecraft 1.21.1 NeoForge modpack ("Andesite Age") managed with **pa
 
 - `cd pack && packwiz refresh` — regenerate hashes after hand-editing a `.pw.toml` (e.g., changing `side`). This is the non-obvious step; stock `packwiz add / export / mr / cf` subcommands are documented by `packwiz --help`.
 - `scripts/check` — fast, no-Docker gate: manifest + sidedness + cached re-export. Terse by default (one-line summary); `--verbose` for full output. Run after every `.pw.toml` edit.
-- `scripts/validate-server` — heavy dev loop: exports, boots a headless NeoForge server, scans logs. Flags: `--clean` (wipe validation volume), `--keep-up` (leave container running). Requires Docker Desktop running.
+- `scripts/validate-server` — heavy dev loop: exports, boots a headless NeoForge server, scans logs. Default reuses the volume (~10s boot). Use `--clean` only when removing a mod, bumping a mod version, or doing a pre-release fresh-install smoke test — not for routine recipe/config/allowlist edits or flake retries (every `--clean` re-pulls every mod jar plus the NeoForge installer from upstream CDNs). `--keep-up` leaves the container running. Requires Docker Desktop running.
 - Other `scripts/*` have self-documenting usage in their header comments; read them when needed. Don't re-run the research-phase ones (`cf-api`, `verify-versions`, `compare-packs`, `resolve-manifest`, `check-modrinth-slug`) casually — they were used to freeze `references/`.
 
 ## Architecture
