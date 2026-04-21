@@ -7,6 +7,7 @@
 #   scripts/validate-server              # fast: reuses the validation_data volume
 #   scripts/validate-server --clean      # wipe the volume first (pristine boot)
 #   scripts/validate-server --keep-up    # leave the server running after validation
+#   scripts/validate-server --verbose    # also print the SUMMARY BOX (default is one-line)
 #
 # Exits 0 on clean boot, 1 on timeout or errors detected.
 
@@ -22,16 +23,26 @@ READY_TIMEOUT="${READY_TIMEOUT:-600}"
 
 CLEAN=0
 KEEP_UP=0
+VERBOSE=0
 for arg in "$@"; do
     case "$arg" in
         --clean)    CLEAN=1 ;;
         --keep-up)  KEEP_UP=1 ;;
+        --verbose)  VERBOSE=1 ;;
         -h|--help)
-            sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'
+            sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
             exit 0 ;;
         *) echo "unknown flag: $arg" >&2; exit 2 ;;
     esac
 done
+
+if [[ -t 1 ]]; then
+    C_GREEN=$'\033[32m' C_RED=$'\033[31m' C_DIM=$'\033[2m' C_BOLD=$'\033[1m' C_OFF=$'\033[0m'
+else
+    C_GREEN="" C_RED="" C_DIM="" C_BOLD="" C_OFF=""
+fi
+
+VALIDATE_START=$(date +%s)
 
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/validate-$(date +%Y%m%d-%H%M%S).log"
@@ -90,6 +101,7 @@ while true; do
     if docker compose exec -T validate rcon-cli list >/dev/null 2>&1; then
         echo "==> server ready in ${elapsed}s (rcon responded)"
         ready=1
+        READY_SEC=$elapsed
         break
     fi
     if [[ "$(docker compose ps -q validate 2>/dev/null)" == "" ]] || \
@@ -178,17 +190,25 @@ err_count() {
     printf '%s\n' "$1" | sed '/^$/d' | wc -l | tr -d ' '
 }
 
-echo
-echo "============================================================"
-echo " VALIDATION SUMMARY"
-echo "============================================================"
-echo " ready       : $([[ $ready == 1 ]] && echo yes || echo NO)"
-echo " log file    : $LOG_FILE"
-echo " errors      : $(err_count "$ERR_HITS") line(s)"
-echo " warn-parse  : $(err_count "$WARN_HITS") line(s)"
-echo " allowlisted : $(err_count "$ALLOWED_HITS") line(s)"
-echo " crash dumps : $(err_count "$CRASH_REPORTS") file(s)"
-echo "============================================================"
+ERR_COUNT=$(err_count "$ERR_HITS")
+WARN_COUNT=$(err_count "$WARN_HITS")
+ALLOW_COUNT=$(err_count "$ALLOWED_HITS")
+CRASH_COUNT=$(err_count "$CRASH_REPORTS")
+STALE_COUNT=$(err_count "$STALE_PATTERNS")
+
+if (( VERBOSE == 1 )); then
+    echo
+    echo "============================================================"
+    echo " VALIDATION SUMMARY"
+    echo "============================================================"
+    echo " ready       : $([[ $ready == 1 ]] && echo yes || echo NO)"
+    echo " log file    : $LOG_FILE"
+    echo " errors      : $ERR_COUNT line(s)"
+    echo " warn-parse  : $WARN_COUNT line(s)"
+    echo " allowlisted : $ALLOW_COUNT line(s)"
+    echo " crash dumps : $CRASH_COUNT file(s)"
+    echo "============================================================"
+fi
 
 if [[ -n "$ERR_HITS" ]]; then
     echo
@@ -219,6 +239,35 @@ if [[ -n "$STALE_PATTERNS" ]]; then
     echo "----- stale allowlist entries (matched 0 lines, consider removing) -----"
     echo -n "$STALE_PATTERNS"
     echo "------------------------------------------------------------------------"
+fi
+
+TOTAL_SEC=$(( $(date +%s) - VALIDATE_START ))
+if (( TOTAL_SEC >= 60 )); then
+    ELAPSED="$((TOTAL_SEC / 60))m$((TOTAL_SEC % 60))s"
+else
+    ELAPSED="${TOTAL_SEC}s"
+fi
+LOG_REL="${LOG_FILE#$REPO_ROOT/}"
+
+if [[ $ready == 1 && -z "$ERR_HITS" && -z "$WARN_HITS" && -z "$CRASH_REPORTS" ]]; then
+    summary="${C_GREEN}✓${C_OFF}  ${C_BOLD}server validation passed${C_OFF}"
+    [[ -n "${READY_SEC:-}" ]] && summary+="  ${C_DIM}ready=${READY_SEC}s${C_OFF}"
+    (( ALLOW_COUNT > 0 )) && summary+="  ${C_DIM}allowlisted=${ALLOW_COUNT}${C_OFF}"
+    (( STALE_COUNT > 0 )) && summary+="  ${C_DIM}stale=${STALE_COUNT}${C_OFF}"
+    summary+="  ${C_DIM}${ELAPSED}${C_OFF}"
+    printf '\n%s\n' "$summary"
+else
+    summary="${C_RED}✗${C_OFF}  ${C_BOLD}server validation failed${C_OFF}"
+    if (( ready == 0 )); then
+        summary+="  ${C_DIM}not-ready${C_OFF}"
+    elif [[ -n "${READY_SEC:-}" ]]; then
+        summary+="  ${C_DIM}ready=${READY_SEC}s${C_OFF}"
+    fi
+    (( ERR_COUNT > 0 )) && summary+="  ${C_DIM}errors=${ERR_COUNT}${C_OFF}"
+    (( WARN_COUNT > 0 )) && summary+="  ${C_DIM}warn-parse=${WARN_COUNT}${C_OFF}"
+    (( CRASH_COUNT > 0 )) && summary+="  ${C_DIM}crash=${CRASH_COUNT}${C_OFF}"
+    summary+="  ${C_DIM}${ELAPSED}${C_OFF}  ${C_DIM}log=${LOG_REL}${C_OFF}"
+    printf '\n%s\n' "$summary"
 fi
 
 # Teardown runs AFTER the summary and is backgrounded so wall-clock

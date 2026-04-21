@@ -9,7 +9,8 @@ An authored Minecraft 1.21.1 NeoForge modpack ("Andesite Age") managed with **pa
 ## Commands worth knowing
 
 - `cd pack && packwiz refresh` — regenerate hashes after hand-editing a `.pw.toml` (e.g., changing `side`). This is the non-obvious step; stock `packwiz add / export / mr / cf` subcommands are documented by `packwiz --help`.
-- `scripts/validate-server` — the live dev loop. Flags: `--clean` (wipe validation volume), `--keep-up` (leave container running). Requires Docker Desktop running.
+- `scripts/check` — fast, no-Docker gate: manifest + sidedness + cached re-export. Terse by default (one-line summary); `--verbose` for full output. Run after every `.pw.toml` edit.
+- `scripts/validate-server` — heavy dev loop: exports, boots a headless NeoForge server, scans logs. Flags: `--clean` (wipe validation volume), `--keep-up` (leave container running). Requires Docker Desktop running.
 - Other `scripts/*` have self-documenting usage in their header comments; read them when needed. Don't re-run the research-phase ones (`cf-api`, `verify-versions`, `compare-packs`, `resolve-manifest`, `check-modrinth-slug`) casually — they were used to freeze `references/`.
 
 ## Architecture
@@ -27,7 +28,7 @@ Known upstream non-blocking errors live in `server-validation/known-issues.txt` 
 
 Companion helpers wired into the same script:
 - `scripts/check-sidedness` — verifies every `.pw.toml` `side` tag is preserved through `packwiz mr export` into `modrinth.index.json`'s `env` block.
-- `scripts/check-mod-manifest` — diffs `pack/mods/` against `server-validation/expected-mods.tsv` and asserts MC/NeoForge pins in `pack/pack.toml`. Update the TSV when adding/removing a mod.
+- `scripts/check-mod-manifest` — diffs `pack/mods/` against `server-validation/expected-mods.tsv` and asserts MC/NeoForge pins in `pack/pack.toml`. Run `scripts/check-mod-manifest --fix` to regenerate the TSV after adding/removing a mod.
 
 ## Distribution plan
 

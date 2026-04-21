@@ -2,7 +2,14 @@
 # Verify the set of mods in pack/mods/ matches server-validation/expected-mods.tsv
 # (slug + side) and that pack.toml still pins the expected MC + NeoForge versions.
 #
-# Exits 0 on match, 1 on any drift.
+# Usage:
+#   scripts/check-mod-manifest         # check only; exits 1 on drift
+#   scripts/check-mod-manifest --fix   # regenerate TSV data rows from pack/mods/
+#
+# --fix rewrites only the data portion of expected-mods.tsv; the leading comment
+# block is preserved. Version pins are never rewritten.
+#
+# Exits 0 on match, 1 on drift, 2 on bad arguments.
 
 set -euo pipefail
 
@@ -12,26 +19,53 @@ TSV="$REPO_ROOT/server-validation/expected-mods.tsv"
 EXPECT_MC="1.21.1"
 EXPECT_NEOFORGE="21.1.227"
 
+FIX=0
+for arg in "$@"; do
+    case "$arg" in
+        --fix) FIX=1 ;;
+        -h|--help)
+            sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
+            exit 0 ;;
+        *) echo "unknown flag: $arg" >&2; exit 2 ;;
+    esac
+done
+
 if [[ ! -f "$TSV" ]]; then
     echo "missing expected-mods manifest: $TSV" >&2
     exit 1
 fi
 
-fail=0
-
-actual=$(
+compute_actual() {
     for f in "$PACK_DIR"/mods/*.pw.toml; do
         slug=$(basename "$f" .pw.toml)
         side=$(sed -nE 's/^side = "([^"]+)".*/\1/p' "$f")
         printf '%s\t%s\n' "$slug" "$side"
     done | sort
-)
+}
 
+if (( FIX == 1 )); then
+    tmp=$(mktemp)
+    trap 'rm -f "$tmp"' EXIT
+    awk '/^[[:space:]]*(#|$)/ {print; next} {exit}' "$TSV" > "$tmp"
+    compute_actual >> "$tmp"
+    mv "$tmp" "$TSV"
+    trap - EXIT
+    count=$(compute_actual | wc -l | tr -d ' ')
+    echo "expected-mods.tsv regenerated ($count mods)"
+    exit 0
+fi
+
+fail=0
+
+actual=$(compute_actual)
 expected=$(grep -vE '^\s*(#|$)' "$TSV" | sort)
 
 if [[ "$actual" != "$expected" ]]; then
     echo "mod manifest drift vs expected-mods.tsv:" >&2
-    diff <(echo "$expected") <(echo "$actual") | sed 's/^/  /' >&2
+    # diff exits 1 when inputs differ; pipefail + set -e would abort before the
+    # hint below, so swallow the pipeline's non-zero status explicitly.
+    diff <(echo "$expected") <(echo "$actual") | sed 's/^/  /' >&2 || true
+    echo "  (run scripts/check-mod-manifest --fix to regenerate, or edit the TSV by hand)" >&2
     fail=1
 fi
 

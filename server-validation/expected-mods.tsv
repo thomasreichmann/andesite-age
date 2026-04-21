@@ -3,7 +3,7 @@
 #
 # Format: slug<TAB>side — one per line, '#' comments and blank lines ignored.
 # Slug is the basename of the .pw.toml file (pack/mods/<slug>.pw.toml).
-# Regenerate after packwiz add/remove by editing this file to match.
+# Regenerate after packwiz add/remove via: scripts/check-mod-manifest --fix
 #
 # slug	side
 copycats	both

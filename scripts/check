@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# Fast, no-Docker gate for pack integrity. Terse by default; designed to be
+# cheap enough to run after every .pw.toml edit and scannable in LLM context.
+#
+# Pipeline:
+#   1. scripts/check-mod-manifest        (pack/mods vs expected-mods.tsv + pins)
+#   2. packwiz refresh && mr export      (only if pack source hash changed)
+#   3. scripts/check-sidedness           (pw.toml side vs mrpack env block)
+#
+# Usage:
+#   scripts/check            # one-line summary on pass, filtered fail output
+#   scripts/check --verbose  # stream every sub-step's output verbatim
+#   scripts/check -h|--help
+#
+# Exits 0 on pass, 1 on any sub-check failure, 2 on bad arguments.
+
+set -uo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PACK_DIR="$REPO_ROOT/pack"
+COMPOSE_DIR="$REPO_ROOT/server-validation"
+MRPACK_OUT="$COMPOSE_DIR/pack.mrpack"
+HASH_FILE="$COMPOSE_DIR/.last-export-hash"
+
+VERBOSE=0
+for arg in "$@"; do
+    case "$arg" in
+        --verbose) VERBOSE=1 ;;
+        -h|--help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) echo "unknown flag: $arg" >&2; exit 2 ;;
+    esac
+done
+
+if [[ -t 1 ]]; then
+    C_GREEN=$'\033[32m' C_RED=$'\033[31m' C_DIM=$'\033[2m' C_BOLD=$'\033[1m' C_OFF=$'\033[0m'
+else
+    C_GREEN="" C_RED="" C_DIM="" C_BOLD="" C_OFF=""
+fi
+
+SECONDS=0
+PASSED=0
+TOTAL=0
+CACHED=0
+FAILED_NAMES=()
+FAILED_OUTPUTS=()
+
+run_step() {
+    local name="$1"; shift
+    TOTAL=$((TOTAL + 1))
+    local out rc
+    out=$("$@" 2>&1); rc=$?
+    if (( rc == 0 )); then
+        PASSED=$((PASSED + 1))
+        if (( VERBOSE == 1 )); then
+            printf '%s==> %s%s\n' "$C_DIM" "$name" "$C_OFF"
+            [[ -n "$out" ]] && printf '%s\n' "$out"
+        fi
+    else
+        FAILED_NAMES+=("$name")
+        FAILED_OUTPUTS+=("$out")
+    fi
+}
+
+pack_source_hash() {
+    {
+        cat "$PACK_DIR/pack.toml" "$PACK_DIR/index.toml"
+        find "$PACK_DIR/mods" -name '*.pw.toml' -print0 | sort -z | xargs -0 cat
+    } | shasum -a 256 | awk '{print $1}'
+}
+
+export_pack() {
+    (cd "$PACK_DIR" && packwiz refresh >/dev/null && packwiz mr export -o "$MRPACK_OUT" >/dev/null) \
+        && echo "$CURRENT_HASH" > "$HASH_FILE"
+}
+
+run_step "manifest" "$REPO_ROOT/scripts/check-mod-manifest"
+
+CURRENT_HASH=$(pack_source_hash)
+if [[ -f "$MRPACK_OUT" && -f "$HASH_FILE" && "$(cat "$HASH_FILE")" == "$CURRENT_HASH" ]]; then
+    TOTAL=$((TOTAL + 1))
+    PASSED=$((PASSED + 1))
+    CACHED=$((CACHED + 1))
+else
+    run_step "export" export_pack
+fi
+
+if [[ -f "$MRPACK_OUT" ]]; then
+    run_step "sidedness" "$REPO_ROOT/scripts/check-sidedness" "$MRPACK_OUT"
+fi
+
+elapsed="${SECONDS}s"
+
+if (( ${#FAILED_NAMES[@]} == 0 )); then
+    summary="${C_GREEN}✓${C_OFF}  ${C_BOLD}pack checks passed${C_OFF}  ${C_DIM}${PASSED}/${TOTAL} checks${C_OFF}"
+    (( CACHED > 0 )) && summary+="  ${C_DIM}${CACHED} cached${C_OFF}"
+    summary+="  ${C_DIM}${elapsed}${C_OFF}"
+    printf '%s\n' "$summary"
+    exit 0
+fi
+
+for i in "${!FAILED_NAMES[@]}"; do
+    printf '%s%s FAILED%s\n' "$C_BOLD" "${FAILED_NAMES[$i]}" "$C_OFF"
+    [[ -n "${FAILED_OUTPUTS[$i]}" ]] && printf '%s\n' "${FAILED_OUTPUTS[$i]}"
+    printf '\n'
+done
+printf '%s✗%s  %spack checks failed%s  %s%d/%d checks passed%s  %s%s%s\n' \
+    "$C_RED" "$C_OFF" "$C_BOLD" "$C_OFF" "$C_DIM" "$PASSED" "$TOTAL" "$C_OFF" "$C_DIM" "$elapsed" "$C_OFF"
+exit 1
