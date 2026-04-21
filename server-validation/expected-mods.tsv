@@ -6,8 +6,12 @@
 # Regenerate after packwiz add/remove via: scripts/check-mod-manifest --fix
 #
 # slug	side
+appleskin	both
+bucketable	both
+controlling	client
 copycats	both
 create	both
+create-aeronautics	both
 create-central-kitchen	both
 create-deco	both
 create-dragons-plus	both
@@ -15,8 +19,29 @@ create-enchantment-industry	both
 create-new-age	both
 create-stuff-additions	both
 createaddition	both
+cristel-lib	both
+dungeons-and-taverns	both
+easy-anvils	both
+easy-magic	both
+easy-villagers	both
 emi	client
 jade	both
 kubejs	both
+mouse-tweaks	client
+polymorph	both
+puzzles-lib	both
+repurposed-structures-forge	server
 rhino	both
+sable	both
+searchables	client
 sodium	client
+towns-and-towers	both
+when-dungeons-arise	server
+when-dungeons-arise-seven-seas	server
+yungs-api	both
+yungs-better-dungeons	server
+yungs-better-mineshafts	server
+yungs-better-nether-fortresses	server
+yungs-better-ocean-monuments	server
+yungs-better-strongholds	server
+yungs-better-witch-huts	server

@@ -8,7 +8,18 @@
 # Stale entries (patterns that match zero lines on a run) are reported as
 # warnings so fixed-upstream bugs get cleaned up automatically.
 
-# RuntimeDistCleaner rejects AbstractClientPlayer on DEDICATED_SERVER as
-# designed — logged as ERROR but not fatal. Source mod unpinned; likely
-# an unguarded @OnlyIn reference somewhere in the Create addon set.
-RuntimeDistCleaner.*AbstractClientPlayer
+# RuntimeDistCleaner rejects client-only classes on DEDICATED_SERVER as
+# designed — logged as ERROR but not fatal. Source mod unpinned; unguarded
+# @OnlyIn references somewhere in the Create addon set (AbstractClientPlayer
+# is from create_sa mixin; ClientLevel offender not yet traced).
+RuntimeDistCleaner.*(AbstractClientPlayer|ClientLevel)
+
+# Orphaned/broken advancements from structure mods (non-fatal — affected
+# achievements just won't fire):
+#   - dungeons_arise:find_fishing_hut, find_thornborn_towers
+#     Parent "find_small_prairie_house" not packaged in WDA 2.1.68.
+#   - minecraft:wander_add_map (from Dungeons and Taverns)
+#     References non-existent function nova_structures:choose_wander.
+#   - minecraft:give_quest_trader_trade (from Dungeons and Taverns)
+#     villager_trade predicate schema mismatch for 1.21.
+AdvancementTree.*Couldn't load advancements.*(give_quest_trader_trade|wander_add_map|find_thornborn_towers|find_fishing_hut)

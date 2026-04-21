@@ -47,6 +47,10 @@ def main(argv):
     with zipfile.ZipFile(mrpack) as z:
         with z.open("modrinth.index.json") as f:
             index = json.load(f)
+        override_mod_files = {
+            Path(n).name for n in z.namelist()
+            if n.startswith("overrides/mods/") and not n.endswith("/")
+        }
 
     actual_by_basename = {Path(f["path"]).name: f.get("env", {}) for f in index["files"]}
 
@@ -55,6 +59,12 @@ def main(argv):
         want = EXPECTED[side]
         got = actual_by_basename.get(filename)
         if got is None:
+            if filename in override_mod_files:
+                if side != "both":
+                    failures.append(
+                        f"{pwname} (side={side}): bundled in overrides/mods/ which installs on both sides — cannot enforce split"
+                    )
+                continue
             failures.append(f"{pwname}: '{filename}' not in mrpack")
         elif got != want:
             failures.append(
