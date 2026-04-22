@@ -58,16 +58,26 @@ layer of QoL, performance, and vanilla-gap-fillers. Nothing else.
 - Easy Anvils — removes the "Too Expensive!" cap
 - Easy Magic — better enchanting table UI
 - Easy Villagers — block-based breeding, trading, and trade management
+- Gravestone Mod — drops a grave on death so you don't lose your inventory
 - Polymorph — recipe-conflict picker
 - Mouse Tweaks — inventory drag-to-transfer behavior
 - Controlling — searchable keybinds menu
+
+**Vanilla+ flavor**
+- Farmer's Delight — cooking, crops, and kitchen tools that fill vanilla's
+  food gap (and pairs with Create: Central Kitchen for automation)
+- Supplementaries — decorative and utility blocks (sconces, signs, globes,
+  pedestals) in pure vanilla visual style
 
 **UI / info**
 - EMI — recipe viewer (client-only)
 - Jade — in-world tooltips
 
 **Performance**
-- Sodium — rendering (client-only)
+- Sodium + Sodium Extra — rendering (client-only)
+- FerriteCore — memory deduplication of block/item state tables
+- ModernFix — bundled upstream patches and load-time speedups
+- spark — in-game profiler (`/spark profiler`) for diagnosing TPS issues
 
 **Scripting**
 - KubeJS + Rhino — pack-side recipe and tag tweaks
