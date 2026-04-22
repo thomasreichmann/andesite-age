@@ -25,8 +25,13 @@ easy-anvils	both
 easy-magic	both
 easy-villagers	both
 emi	client
+farmers-delight	both
+ferrite-core	both
+gravestone-mod	both
 jade	both
 kubejs	both
+modernfix	both
+moonlight	both
 mouse-tweaks	client
 polymorph	both
 puzzles-lib	both
@@ -35,6 +40,9 @@ rhino	both
 sable	both
 searchables	client
 sodium	client
+sodium-extra	client
+spark	both
+supplementaries	both
 towns-and-towers	both
 when-dungeons-arise	server
 when-dungeons-arise-seven-seas	server

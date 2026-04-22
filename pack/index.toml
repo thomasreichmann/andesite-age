@@ -100,6 +100,21 @@ hash = "b07d7101e05c3551bdda0695b71cf87ade3b24e3374d26827c9cf1b0374df4b3"
 metafile = true
 
 [[files]]
+file = "mods/farmers-delight.pw.toml"
+hash = "69495e979400e63b317b80a71bdd9276929d503b12fa0e73bc668c474d5dbc4c"
+metafile = true
+
+[[files]]
+file = "mods/ferrite-core.pw.toml"
+hash = "73360e397134d238ee8fd21d33fd7f9275e9441f74f8f1b6ed92278877c0b9f1"
+metafile = true
+
+[[files]]
+file = "mods/gravestone-mod.pw.toml"
+hash = "2ac1df7fad83d36e69b4aaad32f0b952c9b039d7345592bb66934f40a8606224"
+metafile = true
+
+[[files]]
 file = "mods/jade.pw.toml"
 hash = "b6e0a61fea06f8d6d8e1672cf07b682625c4b74efd548d5093cd9c1fed167eec"
 metafile = true
@@ -107,6 +122,16 @@ metafile = true
 [[files]]
 file = "mods/kubejs.pw.toml"
 hash = "e8c20c0c77e5df58d1386d8190ee16a957d78d62d361469db0b0c29458bf1e84"
+metafile = true
+
+[[files]]
+file = "mods/modernfix.pw.toml"
+hash = "bac10dc72e41ee6df7a09ebd7e16e905897d54a2d9cb9f0c3fa14f569bd6d992"
+metafile = true
+
+[[files]]
+file = "mods/moonlight.pw.toml"
+hash = "c05fa3fa9bc5700104d928b616b15e70d441085dd060c6501122747dc3805de1"
 metafile = true
 
 [[files]]
@@ -145,8 +170,23 @@ hash = "ce9ddada6ffd55a512149cc474c6a453281a997a5fdf1b7b4a2cc73f875e704a"
 metafile = true
 
 [[files]]
+file = "mods/sodium-extra.pw.toml"
+hash = "a1fb713df668ed21dda0602e99cb23b991c8faff841e130d7aae46258c3d6a45"
+metafile = true
+
+[[files]]
 file = "mods/sodium.pw.toml"
 hash = "0281ed9713f3141bdac363056a791845510e14761ea65b4b2813cf96d664b20a"
+metafile = true
+
+[[files]]
+file = "mods/spark.pw.toml"
+hash = "593fa7b30ab016aa45be07bd6bef3a9f160ed0f24689850d60bf84995d69b843"
+metafile = true
+
+[[files]]
+file = "mods/supplementaries.pw.toml"
+hash = "fa0e1562f9dc89d6428546c7388dcfce8706843333d58f16cadce42b56b81085"
 metafile = true
 
 [[files]]
