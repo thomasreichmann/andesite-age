@@ -103,39 +103,49 @@ A full, machine-readable list lives in
 
 ## Installing
 
+The current pack file is at
+[`dist/andesite-age-0.1.0.mrpack`](dist/andesite-age-0.1.0.mrpack).
+Grab it from there (or from the Modrinth listing once approved).
+
 ### Client (Prism / ATLauncher / MultiMC-likes)
 
-Download the `.mrpack` from the Modrinth listing (or from Releases
-once published) and import it as a new instance. Prism handles mrpack
-natively.
+Import the `.mrpack` as a new instance — Prism handles mrpack natively.
 
 ### Server (Docker, via itzg)
 
-The pack is authored against the
+The pack boots on
 [`itzg/minecraft-server`](https://github.com/itzg/docker-minecraft-server)
-Modrinth flow. Minimal `docker-compose.yml`:
+by mounting the `.mrpack` directly. Minimal `docker-compose.yml`:
 
 ```yaml
 services:
   mc:
-    image: itzg/minecraft-server
+    image: itzg/minecraft-server:java21
     ports: ["25565:25565"]
     environment:
       EULA: "TRUE"
       TYPE: MODRINTH
-      MODRINTH_PROJECT: andesite-age
-      MODRINTH_VERSION_ID: <pin-a-specific-version-id>
+      MODRINTH_MODPACK: /modpacks/pack.mrpack
+      MODRINTH_FORCE_SYNCHRONIZE: "true"
+      REMOVE_OLD_MODS: "true"
       MEMORY: 6G
-    volumes: ["./data:/data"]
+      USE_AIKAR_FLAGS: "true"
+    volumes:
+      - "./andesite-age-0.1.0.mrpack:/modpacks/pack.mrpack:ro"
+      - "./data:/data"
     stdin_open: true
     tty: true
 ```
 
-Pin `MODRINTH_VERSION_ID` explicitly so a Modrinth update doesn't
-silently change the pack under a live world. Bump it deliberately.
+Drop the `.mrpack` next to the compose file, then `docker compose up`.
+Bumping versions is a file-swap: replace the `.mrpack`, restart.
 
-Client-only mods (EMI, Sodium) are tagged as such in the mrpack and
-itzg skips them on server installs automatically.
+Once the Modrinth listing is approved you can switch to the simpler
+slug-based flow (`MODRINTH_PROJECT: andesite-age` + a pinned
+`MODRINTH_VERSION_ID`) — same image, no volume mount needed.
+
+Client-only mods (EMI, Sodium, Sodium Extra, etc.) are tagged in the
+mrpack and itzg skips them on server installs automatically.
 
 ## Known issues
 
