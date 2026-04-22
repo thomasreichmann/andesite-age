@@ -1,0 +1,54 @@
+"""
+Build a 512x512 icon: andesite casing texture, pixel-art framed.
+"""
+import zipfile
+from PIL import Image, ImageDraw, ImageFilter
+
+JAR = "/tmp/create.jar"
+SIDE_PATH = "assets/create/textures/block/andesite_casing.png"
+OUT = "/tmp/andesite-age-icon.png"
+
+W = 512
+BG = (22, 24, 28, 255)
+FRAME = (168, 132, 70, 255)
+
+with zipfile.ZipFile(JAR) as z:
+    with z.open(SIDE_PATH) as f:
+        tex = Image.open(f).convert("RGBA").copy()
+
+canvas = Image.new("RGBA", (W, W), BG)
+
+TEX_SIZE = 384
+tex_big = tex.resize((TEX_SIZE, TEX_SIZE), Image.NEAREST)
+
+# Soft drop shadow
+shadow_pad = 16
+shadow = Image.new("RGBA", (TEX_SIZE + shadow_pad * 2, TEX_SIZE + shadow_pad * 2), (0, 0, 0, 0))
+shadow_draw = ImageDraw.Draw(shadow)
+shadow_draw.rectangle(
+    (shadow_pad, shadow_pad, shadow_pad + TEX_SIZE, shadow_pad + TEX_SIZE),
+    fill=(0, 0, 0, 180),
+)
+shadow = shadow.filter(ImageFilter.GaussianBlur(radius=14))
+sx = (W - shadow.size[0]) // 2 + 6
+sy = (W - shadow.size[1]) // 2 + 12
+canvas.alpha_composite(shadow, (sx, sy))
+
+# Texture
+tx = (W - TEX_SIZE) // 2
+ty = (W - TEX_SIZE) // 2
+canvas.alpha_composite(tex_big, (tx, ty))
+
+# Thin brass frame
+frame_w = 4
+frame_layer = Image.new("RGBA", (W, W), (0, 0, 0, 0))
+fd = ImageDraw.Draw(frame_layer)
+fd.rectangle(
+    (tx - frame_w, ty - frame_w, tx + TEX_SIZE + frame_w - 1, ty + TEX_SIZE + frame_w - 1),
+    outline=FRAME,
+    width=frame_w,
+)
+canvas.alpha_composite(frame_layer)
+
+canvas.save(OUT)
+print(f"wrote {OUT}  ({canvas.size})")
