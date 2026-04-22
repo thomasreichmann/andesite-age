@@ -1,0 +1,80 @@
+"""
+Build a 1280x720 gallery banner: andesite casing icon + title text.
+"""
+import zipfile
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
+
+JAR = "/tmp/create.jar"
+SIDE_PATH = "assets/create/textures/block/andesite_casing.png"
+OUT = "/tmp/andesite-age-banner.png"
+
+W, H = 1280, 720
+BG = (22, 24, 28, 255)
+FRAME = (168, 132, 70, 255)
+TITLE_COLOR = (210, 172, 96, 255)
+SUBTITLE_COLOR = (190, 194, 200, 255)
+
+FONT_BOLD = "/System/Library/Fonts/Supplemental/Arial Black.ttf"
+FONT_SUB = "/System/Library/Fonts/Supplemental/Arial.ttf"
+
+with zipfile.ZipFile(JAR) as z:
+    with z.open(SIDE_PATH) as f:
+        tex = Image.open(f).convert("RGBA").copy()
+
+canvas = Image.new("RGBA", (W, H), BG)
+
+BLOCK = 480
+block_x = 100
+block_y = (H - BLOCK) // 2
+
+tex_big = tex.resize((BLOCK, BLOCK), Image.NEAREST)
+
+shadow_pad = 20
+shadow = Image.new("RGBA", (BLOCK + shadow_pad * 2, BLOCK + shadow_pad * 2), (0, 0, 0, 0))
+ImageDraw.Draw(shadow).rectangle(
+    (shadow_pad, shadow_pad, shadow_pad + BLOCK, shadow_pad + BLOCK),
+    fill=(0, 0, 0, 190),
+)
+shadow = shadow.filter(ImageFilter.GaussianBlur(radius=18))
+canvas.alpha_composite(shadow, (block_x - shadow_pad + 8, block_y - shadow_pad + 14))
+canvas.alpha_composite(tex_big, (block_x, block_y))
+
+frame_layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+fw = 5
+ImageDraw.Draw(frame_layer).rectangle(
+    (block_x - fw, block_y - fw, block_x + BLOCK + fw - 1, block_y + BLOCK + fw - 1),
+    outline=FRAME,
+    width=fw,
+)
+canvas.alpha_composite(frame_layer)
+
+# Text block
+text_x = block_x + BLOCK + 80
+title_font = ImageFont.truetype(FONT_BOLD, 72)
+sub_font = ImageFont.truetype(FONT_SUB, 30)
+
+draw = ImageDraw.Draw(canvas)
+
+title = "ANDESITE AGE"
+subtitle_l1 = "A Create-focused vanilla+ pack"
+subtitle_l2 = "for Minecraft 1.21.1 · NeoForge"
+
+tl, tt, tr, tb = draw.textbbox((0, 0), title, font=title_font)
+title_w = tr - tl
+title_h = tb - tt
+sl, st, sr, sb = draw.textbbox((0, 0), subtitle_l1, font=sub_font)
+sub_h = sb - st
+
+line_gap = 18
+sub_gap = 44
+total = title_h + sub_gap + sub_h + line_gap + sub_h
+text_y = (H - total) // 2
+
+draw.text((text_x, text_y), title, font=title_font, fill=TITLE_COLOR)
+
+sub_y = text_y + title_h + sub_gap
+draw.text((text_x, sub_y), subtitle_l1, font=sub_font, fill=SUBTITLE_COLOR)
+draw.text((text_x, sub_y + sub_h + line_gap), subtitle_l2, font=sub_font, fill=SUBTITLE_COLOR)
+
+canvas.save(OUT)
+print(f"wrote {OUT}  ({canvas.size})")
