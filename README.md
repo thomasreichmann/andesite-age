@@ -103,9 +103,10 @@ A full, machine-readable list lives in
 
 ## Installing
 
-The current pack file is at
-[`dist/andesite-age-0.1.0.mrpack`](dist/andesite-age-0.1.0.mrpack).
-Grab it from there (or from the Modrinth listing once approved).
+The current pack file is attached to the latest
+[GitHub Release](https://github.com/thomasreichmann/andesite-age/releases/latest).
+Download `andesite-age-<version>.mrpack` from there (or from the
+Modrinth listing once approved).
 
 ### Client (Prism / ATLauncher / MultiMC-likes)
 
