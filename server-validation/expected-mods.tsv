@@ -7,6 +7,11 @@
 #
 # slug	side
 appleskin	both
+ars-creo	both
+ars-nouveau	both
+ars-numerichud	client
+ars-polymorphia	both
+arsdelight	both
 bucketable	both
 controlling	client
 copycats	both
@@ -20,6 +25,7 @@ create-new-age	both
 create-stuff-additions	both
 createaddition	both
 cristel-lib	both
+curios	both
 dungeons-and-taverns	both
 easy-anvils	both
 easy-magic	both
@@ -27,6 +33,7 @@ easy-villagers	both
 emi	client
 farmers-delight	both
 ferrite-core	both
+geckolib	both
 gravestone-mod	both
 jade	both
 kubejs	both

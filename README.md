@@ -69,6 +69,15 @@ layer of QoL, performance, and vanilla-gap-fillers. Nothing else.
 - Supplementaries — decorative and utility blocks (sconces, signs, globes,
   pedestals) in pure vanilla visual style
 
+**Magic**
+- Ars Nouveau — glyph-based spellcrafting and magical automation; the
+  magic-tier peer to Create's industrial backbone
+- Ars Creo — Create ↔ Ars integration: Starbuncle Wheel generates SU,
+  Spell Turrets and Source Jars work on contraptions
+- Ars Nouveau's Flavors & Delight — Ars ↔ Farmer's Delight cooking integration
+- Ars Polymorphia — Polymorph support for Ars Storage Lecterns
+- Ars NumericHUD — numeric mana readout (client-only)
+
 **UI / info**
 - EMI — recipe viewer (client-only)
 - Jade — in-world tooltips
@@ -91,8 +100,6 @@ A full, machine-readable list lives in
   Foregoing, and other parallel-tech stacks
 - Mod-added quarries, digital miners, and ore-doubling shortcuts
 - Terralith and other aggressive worldgen replacements
-- Magic tech (Ars Nouveau etc.) is on the Tier 4 shortlist but not yet
-  in; will only land if it fits the vibe without stealing Create's role
 
 ## Requirements
 
@@ -132,7 +139,7 @@ services:
       MEMORY: 6G
       USE_AIKAR_FLAGS: "true"
     volumes:
-      - "./andesite-age-0.1.0.mrpack:/modpacks/pack.mrpack:ro"
+      - "./andesite-age-0.2.0.mrpack:/modpacks/pack.mrpack:ro"
       - "./data:/data"
     stdin_open: true
     tty: true
