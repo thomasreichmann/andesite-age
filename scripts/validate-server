@@ -79,6 +79,15 @@ if [[ "$CLEAN" == "1" ]]; then
     docker compose down -v >/dev/null 2>&1 || true
 fi
 
+# Clear stale crash reports from the volume so a successful re-boot isn't
+# flagged as crashed because a previous failed boot left a crash dump behind.
+# The volume is reused across non-clean runs; without this, every run after
+# a failed boot would falsely report crash=N until --clean. Uses a one-shot
+# busybox container to avoid re-running the itzg setup scripts.
+docker compose down >/dev/null 2>&1 || true
+docker run --rm -v server-validation_validation_data:/data busybox \
+    sh -c 'rm -rf /data/crash-reports/* 2>/dev/null; exit 0' >/dev/null 2>&1 || true
+
 echo "==> bringing up itzg server (container: andesite-validate)"
 # Capture boot timestamp so `docker compose logs --since` only returns lines
 # from THIS boot — without this, allowlisted-error counts grow on each

@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+# Probes a running validate-server for structure registration. Catches the
+# class of bug where a structure mod loads but its structures fail to
+# register (typo'd biome tag, broken jigsaw template_pool reference, etc.) —
+# things scripts/validate-server's log scan would miss because they don't
+# emit ERROR-level entries.
+#
+# Pipeline:
+#   1. assert andesite-validate container is running
+#   2. for each <namespace:id> in EXPECTED, run /locate structure via rcon
+#   3. classify response: REGISTERED (found or 'could not find in radius')
+#                         vs UNREGISTERED (parser/element-not-found errors)
+#
+# Usage:
+#   scripts/check-structures            # one-line summary on pass
+#   scripts/check-structures --verbose  # show every probe response
+#   scripts/check-structures -h|--help
+#
+# Prereq: scripts/validate-server --keep-up   (so the container is alive)
+# Exits 0 on pass (every expected structure registered), 1 on missing
+# registrations, 2 on bad arguments / no running server.
+
+set -uo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+COMPOSE_DIR="$REPO_ROOT/server-validation"
+CONTAINER="andesite-validate"
+
+VERBOSE=0
+for arg in "$@"; do
+    case "$arg" in
+        --verbose) VERBOSE=1 ;;
+        -h|--help) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) echo "unknown flag: $arg" >&2; exit 2 ;;
+    esac
+done
+
+if [[ -t 1 ]]; then
+    C_GREEN=$'\033[32m' C_RED=$'\033[31m' C_DIM=$'\033[2m' C_BOLD=$'\033[1m' C_OFF=$'\033[0m'
+else
+    C_GREEN="" C_RED="" C_DIM="" C_BOLD="" C_OFF=""
+fi
+
+# Verify the validate container is up. If not, point at the script that brings it up
+# rather than booting it ourselves (this script is a probe, not a bootstrapper).
+cd "$COMPOSE_DIR"
+if ! docker compose ps --status running --services 2>/dev/null | grep -q '^validate$'; then
+    echo "${C_RED}error${C_OFF}: $CONTAINER is not running" >&2
+    echo "  start it with: scripts/validate-server --keep-up" >&2
+    exit 2
+fi
+
+# Expected structure IDs grouped by mod. Adding a new structure mod? Append
+# its IDs here. Each entry is a single rcon /locate target — namespace:id.
+#
+# Note: only mods that register first-class Structures (data/<ns>/worldgen/
+# structure/*.json) belong here. Mods that ship placed_features (Artifacts'
+# campsite) or .nbt-template features driven by custom code (Realm RPG's
+# chambers) do NOT register on /locate — they're verified by boot success
+# alone since their biome tags load through the standard datapack pipeline.
+EXPECTED=(
+    # L_Ender's Cataclysm — boss arenas + sub-dungeons
+    "cataclysm:burning_arena"
+    "cataclysm:ancient_factory"
+    "cataclysm:ruined_citadel"
+    "cataclysm:sunken_city"
+    "cataclysm:cursed_pyramid"
+    "cataclysm:frosted_prison"
+    "cataclysm:acropolis"
+    "cataclysm:soul_black_smith"
+    "cataclysm:amethyst_nest"
+    # Structory — sample across biome-anchored types
+    "structory:northern_ruin"
+    "structory:abandoned_chapel"
+    "structory:jungle_ruin"
+    "structory:swamp_ruin"
+    "structory:graveyard"
+    "structory:firetower"
+    # Structory: Towers
+    "structory_towers:ocean_pillar"
+    "structory_towers:ancient_temple"
+    "structory_towers:farmer_outpost"
+    "structory_towers:engineer_tower"
+)
+
+PROBE_OUT=$(mktemp)
+trap 'rm -f "$PROBE_OUT"' EXIT
+
+REGISTERED=0
+UNREGISTERED=0
+UNKNOWN=0
+MISSING_NAMES=()
+
+probe_one() {
+    local id="$1"
+    local out
+    out=$(docker compose exec -T validate rcon-cli locate structure "$id" 2>&1)
+    # Classification. /locate responses we've seen:
+    #   "The nearest <id> is at [...]"           -> registered + nearby
+    #   "Could not find a structure of type <id>" -> registered, not in radius
+    #   "No element of type [...] found for <id>" -> NOT registered (mod gone)
+    #   "Unknown structure" / parse error         -> NOT registered
+    if [[ "$out" == *"The nearest"* ]] || [[ "$out" == *"Could not find a structure"* ]]; then
+        echo "REGISTERED  $id" >> "$PROBE_OUT"
+        return 0
+    elif [[ "$out" == *"No element of type"* ]] || [[ "$out" == *"Unknown"* ]] || [[ "$out" == *"Incorrect argument"* ]]; then
+        echo "UNREGISTERED  $id  -- $out" >> "$PROBE_OUT"
+        return 1
+    else
+        echo "UNKNOWN  $id  -- $out" >> "$PROBE_OUT"
+        return 2
+    fi
+}
+
+for id in "${EXPECTED[@]}"; do
+    probe_one "$id"
+    case $? in
+        0) REGISTERED=$((REGISTERED + 1)) ;;
+        1) UNREGISTERED=$((UNREGISTERED + 1)); MISSING_NAMES+=("$id") ;;
+        2) UNKNOWN=$((UNKNOWN + 1)); MISSING_NAMES+=("$id") ;;
+    esac
+done
+
+TOTAL=${#EXPECTED[@]}
+
+if [[ "$VERBOSE" == "1" ]]; then
+    echo "----- probe results -----"
+    cat "$PROBE_OUT"
+    echo "-------------------------"
+fi
+
+if (( UNREGISTERED == 0 && UNKNOWN == 0 )); then
+    echo "${C_GREEN}✓${C_OFF}  all structures registered  ${REGISTERED}/${TOTAL}"
+    exit 0
+fi
+
+# Failures: dump the misclassified probes regardless of --verbose so the
+# user can act on them.
+echo "${C_RED}✗${C_OFF}  structure check failed  registered=${REGISTERED}/${TOTAL}  unregistered=${UNREGISTERED}  unknown=${UNKNOWN}"
+echo
+echo "----- failing probes -----"
+grep -E '^(UNREGISTERED|UNKNOWN)' "$PROBE_OUT"
+echo "--------------------------"
+exit 1
