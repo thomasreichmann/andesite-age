@@ -40,11 +40,6 @@ hash = "5a21b57951f08465ee9a49e5a7650655291dd441e8ee114c6a7c7caf0a180527"
 metafile = true
 
 [[files]]
-file = "mods/better-combat.pw.toml"
-hash = "5486f656b149dd16ebd97ea62f3410372ad6883604f51e88d14f22c5263a8280"
-metafile = true
-
-[[files]]
 file = "mods/bucketable.pw.toml"
 hash = "aa4e935273dd600da699a039dc9390049a8265cce221a41210a95992fb857586"
 metafile = true
@@ -52,11 +47,6 @@ metafile = true
 [[files]]
 file = "mods/cataclysm-tools.pw.toml"
 hash = "e52a0c12a4b0060406d058aecada178b51c612a6f984a60bd8d59a79f937f6c1"
-metafile = true
-
-[[files]]
-file = "mods/cataclysm-x-bettercombat-compat.pw.toml"
-hash = "013b9fabe0ddcb2bf828c242688210efe5462b15af9ab240979a4d0633537748"
 metafile = true
 
 [[files]]
@@ -75,18 +65,8 @@ hash = "45c8140947789e456b351bd6faffb4eda2385f3ddfae755f5ca25687ab36ec93"
 metafile = true
 
 [[files]]
-file = "mods/cloth-config.pw.toml"
-hash = "75181b55e0407d1fca1e2f346c6501f919f5109545990ddfb66db9cd1b771f8a"
-metafile = true
-
-[[files]]
 file = "mods/collective.pw.toml"
 hash = "a567cd22b6f35cb5f71b4aa394c01d341ce01274c9b6256cbcc6f48a450a2ba3"
-metafile = true
-
-[[files]]
-file = "mods/combat-roll.pw.toml"
-hash = "9bb81c87fca7a6429a10e18ad8665fb9accd758f53737f1a5543787be8308e51"
 metafile = true
 
 [[files]]
@@ -200,11 +180,6 @@ hash = "73360e397134d238ee8fd21d33fd7f9275e9441f74f8f1b6ed92278877c0b9f1"
 metafile = true
 
 [[files]]
-file = "mods/first-person-model.pw.toml"
-hash = "bbcbc7b4f4510f9dde83cac3d7c674536195cdbdd049207552a685c1a291997a"
-metafile = true
-
-[[files]]
 file = "mods/geckolib.pw.toml"
 hash = "0521ed2becdf2b460511c92e80e2702a4b6e540c85c99fb571844e1c7c505724"
 metafile = true
@@ -212,11 +187,6 @@ metafile = true
 [[files]]
 file = "mods/gravestone-mod.pw.toml"
 hash = "2ac1df7fad83d36e69b4aaad32f0b952c9b039d7345592bb66934f40a8606224"
-metafile = true
-
-[[files]]
-file = "mods/horse-combat-controls.pw.toml"
-hash = "c288ece48f889cb326976e62165305db0cf509dc652aa95fb0c7c658837b207d"
 metafile = true
 
 [[files]]
@@ -327,16 +297,6 @@ metafile = true
 [[files]]
 file = "mods/natures-compass.pw.toml"
 hash = "35acdf433fe8f8599f59975e848efdb717663c2c471d3a5dc18743799795a736"
-metafile = true
-
-[[files]]
-file = "mods/not-enough-animations.pw.toml"
-hash = "44dde164b3d9e130a8d8dd6ff84bfcc936825465b966a06c7358f0ddf3660fd0"
-metafile = true
-
-[[files]]
-file = "mods/playeranimator.pw.toml"
-hash = "93284ca7f2f23f0bb76d42b797cabf2aea1914ee9825bec82bf6ffe4c60dda0d"
 metafile = true
 
 [[files]]

@@ -13,16 +13,12 @@ ars-numerichud	client
 ars-polymorphia	both
 arsdelight	both
 artifacts	both
-better-combat	both
 bucketable	both
 cataclysm-tools	both
-cataclysm-x-bettercombat-compat	both
 cataclysm-x-yungs	server
 charm-of-undying	both
 cinematic-cataclysm	both
-cloth-config	both
 collective	both
-combat-roll	both
 controlling	client
 copycats	both
 create	both
@@ -45,10 +41,8 @@ explorers-compass	both
 farmers-delight	both
 fdlib	both
 ferrite-core	both
-first-person-model	client
 geckolib	both
 gravestone-mod	both
-horse-combat-controls	both
 jade	both
 kubejs	both
 l_enders-cataclysm	both
@@ -71,8 +65,6 @@ modernfix	both
 moonlight	both
 mouse-tweaks	client
 natures-compass	both
-not-enough-animations	client
-playeranimator	both
 polymorph	both
 puzzles-lib	both
 realm-rpg-fallen-adventurers	both
