@@ -1,0 +1,425 @@
+#!/usr/bin/env bash
+# Verify Minecraft mod compatibility with this pack.
+# Resolves mod identifiers across Modrinth → CurseForge → GitHub and reports
+# whether they have a build matching the pack's MC + loader pins (read from
+# pack/pack.toml). Designed to be cheap to run pre-add and easy to consume from
+# both human and agent contexts.
+#
+# Usage:
+#   scripts/check-mod-compat <id-or-url>...        # terse, one line per mod
+#   scripts/check-mod-compat --verbose <ids...>    # human-readable expanded
+#   scripts/check-mod-compat --json    <ids...>    # machine-readable JSON array
+#   scripts/check-mod-compat -h|--help
+#
+# Identifiers can be:
+#   - Modrinth slug:        create-deco
+#   - Display name:         "Create: New Age"     (fuzzy-searched)
+#   - Modrinth URL:         https://modrinth.com/mod/jei
+#   - CurseForge URL:       https://www.curseforge.com/minecraft/mc-mods/jei
+#   - GitHub URL:           https://github.com/owner/repo
+#
+# Exit codes: 0 = all compatible; 1 = at least one incompatible/missing/warn;
+#             2 = bad arguments.
+#
+# Requires: curl, jq. CurseForge lookups need CF_API_KEY in .env.local; if
+# absent, the script degrades gracefully (Modrinth + GitHub still work).
+
+set -uo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PACK_DIR="$REPO_ROOT/pack"
+ENV_FILE="$REPO_ROOT/.env.local"
+
+MODE=terse
+INPUTS=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --json)    MODE=json;    shift ;;
+        --verbose) MODE=verbose; shift ;;
+        -h|--help) sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        --)        shift; INPUTS+=("$@"); break ;;
+        -*)        echo "unknown flag: $1" >&2; exit 2 ;;
+        *)         INPUTS+=("$1"); shift ;;
+    esac
+done
+
+if (( ${#INPUTS[@]} == 0 )); then
+    echo "usage: scripts/check-mod-compat [--json|--verbose] <id-or-url>..." >&2
+    exit 2
+fi
+
+# Pack pins
+MC_VERSION=$(awk -F' = ' '/^minecraft/{gsub(/[" ]/,"",$2); print $2; exit}' "$PACK_DIR/pack.toml")
+NEOFORGE=$(awk -F' = ' '/^neoforge/{gsub(/[" ]/,"",$2); print $2; exit}' "$PACK_DIR/pack.toml")
+LOADER="neoforge"
+[[ -z "$MC_VERSION" || -z "$NEOFORGE" ]] && { echo "could not parse mc/neoforge from pack.toml" >&2; exit 2; }
+
+# CF key (optional)
+CF_AVAILABLE=0
+if [[ -f "$ENV_FILE" ]]; then
+    # shellcheck disable=SC1090
+    source "$ENV_FILE" 2>/dev/null || true
+    [[ -n "${CF_API_KEY:-}" ]] && CF_AVAILABLE=1
+fi
+
+# Already-installed slugs (for "already in pack" detection)
+INSTALLED_SLUGS=$(grep -hE '^\s*mod-id\s*=' "$PACK_DIR"/mods/*.pw.toml 2>/dev/null | sed -E 's/.*= *"([^"]+)".*/\1/' | sort -u || true)
+INSTALLED_FILES=$(ls "$PACK_DIR"/mods/ 2>/dev/null | sed 's/\.pw\.toml$//' | sort -u || true)
+
+if [[ -t 1 ]] && [[ "$MODE" != "json" ]]; then
+    C_GREEN=$'\033[32m' C_RED=$'\033[31m' C_YELLOW=$'\033[33m' C_DIM=$'\033[2m' C_BOLD=$'\033[1m' C_OFF=$'\033[0m'
+else
+    C_GREEN="" C_RED="" C_YELLOW="" C_DIM="" C_BOLD="" C_OFF=""
+fi
+
+# --- Source-specific lookups ---
+
+# Returns JSON: {found, slug, project_id, title, downloads, updated, latest_compatible_version, latest_compatible_filename, supported_loaders, supported_mc_versions, license, side, body_excerpt}
+modrinth_lookup() {
+    local query="$1"
+    local proj fuzzy=false
+    # Try as exact slug/id first
+    proj=$(curl -sS -o - -w '\n%{http_code}' "https://api.modrinth.com/v2/project/$query" 2>/dev/null)
+    local code body
+    code=$(echo "$proj" | tail -n1)
+    body=$(echo "$proj" | sed '$d')
+    if [[ "$code" != "200" ]]; then
+        # Only fuzzy-search name-shaped inputs (contain space/caps/punct).
+        # Slug-shaped inputs (all lowercase + [a-z0-9-]) that 404 are notfound.
+        if [[ "$query" =~ ^[a-z0-9_-]+$ ]]; then
+            jq -n '{found:false, source:"modrinth"}'
+            return
+        fi
+        local search
+        search=$(curl -sS "https://api.modrinth.com/v2/search?query=$(jq -rn --arg q "$query" '$q|@uri')&limit=5&facets=%5B%5B%22project_type%3Amod%22%5D%5D" 2>/dev/null)
+        local hit_id
+        hit_id=$(echo "$search" | jq -r '.hits[0].project_id // empty')
+        if [[ -z "$hit_id" ]]; then
+            jq -n '{found:false, source:"modrinth"}'
+            return
+        fi
+        body=$(curl -sS "https://api.modrinth.com/v2/project/$hit_id" 2>/dev/null)
+        fuzzy=true
+    fi
+    local pid slug title downloads updated client_side server_side license_str
+    pid=$(echo "$body" | jq -r '.id')
+    slug=$(echo "$body" | jq -r '.slug')
+    title=$(echo "$body" | jq -r '.title')
+    downloads=$(echo "$body" | jq -r '.downloads')
+    updated=$(echo "$body" | jq -r '.updated')
+    client_side=$(echo "$body" | jq -r '.client_side // "unknown"')
+    server_side=$(echo "$body" | jq -r '.server_side // "unknown"')
+    license_str=$(echo "$body" | jq -r '.license.id // .license.name // "unknown"')
+
+    # Versions matching MC + loader
+    local versions
+    versions=$(curl -sS "https://api.modrinth.com/v2/project/$pid/version?game_versions=%5B%22$MC_VERSION%22%5D&loaders=%5B%22$LOADER%22%5D" 2>/dev/null)
+    local latest_ver latest_filename latest_id
+    latest_ver=$(echo "$versions" | jq -r '.[0].version_number // empty')
+    latest_filename=$(echo "$versions" | jq -r '.[0].files[0].filename // empty')
+    latest_id=$(echo "$versions" | jq -r '.[0].id // empty')
+
+    # All loader/mc combos this project supports (for diagnosing "wrong version")
+    local all_versions all_loaders all_mcs
+    all_versions=$(curl -sS "https://api.modrinth.com/v2/project/$pid/version" 2>/dev/null)
+    all_loaders=$(echo "$all_versions" | jq -c '[.[].loaders[]] | unique')
+    all_mcs=$(echo "$all_versions" | jq -c '[.[].game_versions[]] | unique | map(select(test("^[0-9]+\\.[0-9]+(\\.[0-9]+)?$"))) | sort_by(split(".") | map(tonumber)) | reverse | .[0:8]')
+
+    jq -n \
+        --arg source modrinth \
+        --arg pid "$pid" --arg slug "$slug" --arg title "$title" \
+        --argjson downloads "$downloads" --arg updated "$updated" \
+        --arg client_side "$client_side" --arg server_side "$server_side" \
+        --arg license "$license_str" \
+        --arg latest_ver "$latest_ver" --arg latest_filename "$latest_filename" --arg latest_id "$latest_id" \
+        --argjson all_loaders "$all_loaders" --argjson all_mcs "$all_mcs" \
+        --argjson fuzzy "$fuzzy" \
+        '{found:true, source:$source, project_id:$pid, slug:$slug, title:$title,
+          fuzzy_match:$fuzzy,
+          downloads:$downloads, updated:$updated,
+          client_side:$client_side, server_side:$server_side, license:$license,
+          compatible: ($latest_ver != ""),
+          latest_compatible_version:$latest_ver,
+          latest_compatible_filename:$latest_filename,
+          latest_compatible_id:$latest_id,
+          supported_loaders:$all_loaders,
+          supported_mc_versions:$all_mcs}'
+}
+
+curseforge_lookup() {
+    local query="$1"
+    (( CF_AVAILABLE == 0 )) && { jq -n '{found:false, source:"curseforge", error:"CF_API_KEY not set"}'; return; }
+    local search slug_q
+    slug_q=$(jq -rn --arg q "$query" '$q|@uri')
+    search=$(curl -sS -H "Accept: application/json" -H "x-api-key: $CF_API_KEY" \
+        "https://api.curseforge.com/v1/mods/search?gameId=432&classId=6&searchFilter=$slug_q" 2>/dev/null)
+    local mod
+    local exact_mod fuzzy_mod fuzzy=false
+    exact_mod=$(echo "$search" | jq -c --arg q "$query" '(.data // []) | map(select((.slug == $q) or (.name | ascii_downcase == ($q | ascii_downcase))))[0] // null')
+    if [[ "$exact_mod" != "null" && -n "$exact_mod" ]]; then
+        mod="$exact_mod"
+    else
+        fuzzy_mod=$(echo "$search" | jq -c '(.data // [])[0] // null')
+        [[ "$fuzzy_mod" == "null" || -z "$fuzzy_mod" ]] && { jq -n '{found:false, source:"curseforge"}'; return; }
+        mod="$fuzzy_mod"
+        fuzzy=true
+    fi
+
+    local mod_id name slug summary downloads
+    mod_id=$(echo "$mod" | jq -r '.id')
+    name=$(echo "$mod" | jq -r '.name')
+    slug=$(echo "$mod" | jq -r '.slug')
+    summary=$(echo "$mod" | jq -r '.summary // ""')
+    downloads=$(echo "$mod" | jq -r '.downloadCount // 0')
+
+    # Files for our MC version
+    # gameVersionTypeId: 1 = MC version; we filter via gameVersion query param
+    local files
+    files=$(curl -sS -H "Accept: application/json" -H "x-api-key: $CF_API_KEY" \
+        "https://api.curseforge.com/v1/mods/$mod_id/files?gameVersion=$MC_VERSION&pageSize=50" 2>/dev/null)
+    # NeoForge is modLoader 6; Forge is 1; Fabric is 4
+    local nf_file
+    nf_file=$(echo "$files" | jq -c '.data | map(select(.gameVersions | map(ascii_downcase) | contains(["neoforge"])))[0] // null')
+    local nf_filename nf_date
+    if [[ "$nf_file" != "null" ]]; then
+        nf_filename=$(echo "$nf_file" | jq -r '.fileName')
+        nf_date=$(echo "$nf_file" | jq -r '.fileDate')
+    fi
+    local all_loaders
+    all_loaders=$(echo "$files" | jq -c '[.data[].gameVersions[] | select(IN("NeoForge","Forge","Fabric","Quilt"))] | unique')
+
+    jq -n \
+        --arg source curseforge \
+        --arg mod_id "$mod_id" --arg slug "$slug" --arg name "$name" \
+        --argjson downloads "$downloads" --arg summary "$summary" \
+        --arg nf_filename "${nf_filename:-}" --arg nf_date "${nf_date:-}" \
+        --argjson all_loaders "$all_loaders" \
+        --argjson fuzzy "$fuzzy" \
+        '{found:true, source:$source, project_id:$mod_id, slug:$slug, title:$name,
+          fuzzy_match:$fuzzy,
+          downloads:$downloads, summary:$summary,
+          compatible: ($nf_filename != ""),
+          latest_compatible_filename:$nf_filename,
+          latest_compatible_date:$nf_date,
+          supported_loaders:$all_loaders}'
+}
+
+github_lookup() {
+    # Expects "owner/repo"
+    local repo="$1"
+    local body code
+    body=$(curl -sS -o - -w '\n%{http_code}' "https://api.github.com/repos/$repo" 2>/dev/null)
+    code=$(echo "$body" | tail -n1)
+    body=$(echo "$body" | sed '$d')
+    if [[ "$code" != "200" ]]; then
+        jq -n --arg repo "$repo" '{found:false, source:"github", repo:$repo}'
+        return
+    fi
+    local stars forks updated archived desc
+    stars=$(echo "$body" | jq -r '.stargazers_count')
+    forks=$(echo "$body" | jq -r '.forks_count')
+    updated=$(echo "$body" | jq -r '.pushed_at')
+    archived=$(echo "$body" | jq -r '.archived')
+    desc=$(echo "$body" | jq -r '.description // ""')
+
+    # Releases — find ones whose asset filenames mention our MC version
+    local releases asset_match all_assets
+    releases=$(curl -sS "https://api.github.com/repos/$repo/releases?per_page=20" 2>/dev/null)
+    asset_match=$(echo "$releases" | jq -c --arg mc "$MC_VERSION" --arg loader "$LOADER" '
+        [.[] | .assets[]? | select(.name | test($mc; "i")) | {name:.name, mc_match:true, loader_match:(.name | test($loader; "i"))}] | .[0] // null
+    ')
+    all_assets=$(echo "$releases" | jq -c '[.[] | .assets[]? | .name] | unique | .[0:5]')
+    local mcreator=false
+    if curl -sSf "https://raw.githubusercontent.com/$repo/master/build.gradle" 2>/dev/null | grep -q mcreator || \
+       curl -sSf "https://raw.githubusercontent.com/$repo/main/build.gradle" 2>/dev/null | grep -q mcreator; then
+        mcreator=true
+    fi
+
+    jq -n \
+        --arg source github --arg repo "$repo" \
+        --argjson stars "$stars" --argjson forks "$forks" --arg updated "$updated" \
+        --argjson archived "$archived" --argjson mcreator "$mcreator" \
+        --arg desc "$desc" --argjson asset_match "$asset_match" --argjson all_assets "$all_assets" \
+        '{found:true, source:$source, repo:$repo, title:$repo,
+          stars:$stars, forks:$forks, updated:$updated, archived:$archived,
+          mcreator_project:$mcreator, description:$desc,
+          asset_for_our_mc:$asset_match,
+          available_release_assets:$all_assets,
+          compatible:($asset_match != null and ($asset_match.loader_match // false))}'
+}
+
+# Resolve one input to a result JSON
+resolve_one() {
+    local input="$1"
+    local result
+
+    case "$input" in
+        https://modrinth.com/mod/*|https://modrinth.com/plugin/*|https://modrinth.com/datapack/*)
+            local slug
+            slug=$(echo "$input" | sed -E 's#.*modrinth.com/[^/]+/([^/?#]+).*#\1#')
+            result=$(modrinth_lookup "$slug")
+            ;;
+        https://www.curseforge.com/minecraft/mc-mods/*|https://legacy.curseforge.com/minecraft/mc-mods/*)
+            local slug
+            slug=$(echo "$input" | sed -E 's#.*mc-mods/([^/?#]+).*#\1#')
+            result=$(curseforge_lookup "$slug")
+            ;;
+        https://github.com/*)
+            local repo
+            repo=$(echo "$input" | sed -E 's#https://github.com/([^/]+/[^/?#]+).*#\1#' | sed 's/\.git$//')
+            result=$(github_lookup "$repo")
+            ;;
+        */*)
+            # bare owner/repo
+            result=$(github_lookup "$input")
+            ;;
+        *)
+            # Try Modrinth, then CF
+            result=$(modrinth_lookup "$input")
+            if [[ "$(echo "$result" | jq -r '.found')" != "true" ]]; then
+                local cf
+                cf=$(curseforge_lookup "$input")
+                [[ "$(echo "$cf" | jq -r '.found')" == "true" ]] && result="$cf"
+            fi
+            ;;
+    esac
+
+    # Decorate with input + already-installed flag
+    local installed=false
+    local mod_id slug
+    mod_id=$(echo "$result" | jq -r '.project_id // empty')
+    slug=$(echo "$result" | jq -r '.slug // empty')
+    if [[ -n "$mod_id" ]] && echo "$INSTALLED_SLUGS" | grep -qFx "$mod_id"; then installed=true; fi
+    if [[ -n "$slug" ]] && echo "$INSTALLED_FILES" | grep -qiFx "$slug"; then installed=true; fi
+
+    echo "$result" | jq --arg input "$input" --argjson installed "$installed" \
+        '. + {input:$input, already_installed:$installed}'
+}
+
+# Verdict: ok | incompatible | notfound | warn
+verdict_for() {
+    local r="$1"
+    local found compat src
+    found=$(echo "$r" | jq -r '.found')
+    [[ "$found" != "true" ]] && { echo notfound; return; }
+    compat=$(echo "$r" | jq -r '.compatible // false')
+    src=$(echo "$r" | jq -r '.source')
+    if [[ "$compat" == "true" ]]; then
+        # Quality flags downgrade ok → warn
+        if [[ "$src" == "github" ]]; then
+            local stars mcreator archived
+            stars=$(echo "$r" | jq -r '.stars')
+            mcreator=$(echo "$r" | jq -r '.mcreator_project')
+            archived=$(echo "$r" | jq -r '.archived')
+            if [[ "$mcreator" == "true" || "$archived" == "true" || "$stars" -lt 3 ]]; then
+                echo warn; return
+            fi
+        fi
+        echo ok
+    else
+        echo incompatible
+    fi
+}
+
+format_terse() {
+    local r="$1" v="$2"
+    local input title src
+    input=$(echo "$r" | jq -r '.input')
+    title=$(echo "$r" | jq -r '.title // .repo // .input')
+    src=$(echo "$r" | jq -r '.source // "?"')
+
+    case "$v" in
+        ok)
+            local ver dl updated installed fuzzy
+            ver=$(echo "$r" | jq -r '.latest_compatible_version // .latest_compatible_filename // ""')
+            dl=$(echo "$r" | jq -r '.downloads // 0' | awk '{
+                if ($1 >= 1000000) printf "%.1fM", $1/1000000;
+                else if ($1 >= 1000) printf "%.0fk", $1/1000;
+                else printf "%d", $1
+            }')
+            updated=$(echo "$r" | jq -r '.updated // .latest_compatible_date // ""' | cut -c1-10)
+            installed=$(echo "$r" | jq -r '.already_installed')
+            fuzzy=$(echo "$r" | jq -r '.fuzzy_match // false')
+            local extra=""
+            [[ "$installed" == "true" ]] && extra+="${C_DIM} (already installed)${C_OFF}"
+            [[ "$fuzzy" == "true" ]] && extra+="${C_YELLOW} (fuzzy match for \"$input\")${C_OFF}"
+            printf '%s✓%s  %-40s %s%s%s  %s%s dl%s  %s%s%s  %s%s%s%s\n' \
+                "$C_GREEN" "$C_OFF" "$title" "$C_BOLD" "$ver" "$C_OFF" "$C_DIM" "$dl" "$C_OFF" "$C_DIM" "$updated" "$C_OFF" "$C_DIM" "$src" "$C_OFF" "$extra"
+            ;;
+        warn)
+            local stars mcreator archived flags=""
+            stars=$(echo "$r" | jq -r '.stars // 0')
+            mcreator=$(echo "$r" | jq -r '.mcreator_project // false')
+            archived=$(echo "$r" | jq -r '.archived // false')
+            [[ "$mcreator" == "true" ]] && flags+="MCreator·"
+            [[ "$archived" == "true" ]] && flags+="archived·"
+            [[ "$stars" -lt 3 ]] && flags+="${stars}★·"
+            flags="${flags%·}"
+            printf '%s⚠%s  %-40s %s%s%s  %sGitHub-only%s\n' \
+                "$C_YELLOW" "$C_OFF" "$title" "$C_DIM" "$flags" "$C_OFF" "$C_DIM" "$C_OFF"
+            ;;
+        incompatible)
+            local src_inner
+            src_inner=$(echo "$r" | jq -r '.source')
+            if [[ "$src_inner" == "github" ]]; then
+                local assets
+                assets=$(echo "$r" | jq -r '.available_release_assets // [] | join(", ")')
+                printf '%s✗%s  %-40s %sno %s %s asset%s  %savailable: %s%s\n' \
+                    "$C_RED" "$C_OFF" "$title" "$C_BOLD" "$LOADER" "$MC_VERSION" "$C_OFF" "$C_DIM" "$assets" "$C_OFF"
+            else
+                local supported mcs
+                supported=$(echo "$r" | jq -r '.supported_loaders // [] | join(",")')
+                mcs=$(echo "$r" | jq -r '.supported_mc_versions // [] | .[0:3] | join(",")')
+                printf '%s✗%s  %-40s %sno %s/%s build%s  %ssupports: %s on %s%s\n' \
+                    "$C_RED" "$C_OFF" "$title" "$C_BOLD" "$LOADER" "$MC_VERSION" "$C_OFF" "$C_DIM" "$supported" "$mcs" "$C_OFF"
+            fi
+            ;;
+        notfound)
+            printf '%s?%s  %-40s %snot found on Modrinth, CF, or GitHub%s\n' \
+                "$C_DIM" "$C_OFF" "$input" "$C_DIM" "$C_OFF"
+            ;;
+    esac
+}
+
+format_verbose() {
+    local r="$1" v="$2"
+    format_terse "$r" "$v"
+    printf '%s' "$C_DIM"
+    echo "$r" | jq '.' | sed 's/^/    /'
+    printf '%s' "$C_OFF"
+    echo
+}
+
+# --- Main loop ---
+
+RESULTS=()
+EXIT_CODE=0
+
+for input in "${INPUTS[@]}"; do
+    r=$(resolve_one "$input")
+    v=$(verdict_for "$r")
+    r=$(echo "$r" | jq --arg v "$v" '. + {verdict:$v}')
+    RESULTS+=("$r")
+    [[ "$v" != "ok" ]] && EXIT_CODE=1
+done
+
+case "$MODE" in
+    json)
+        printf '%s\n' "${RESULTS[@]}" | jq -s --arg mc "$MC_VERSION" --arg loader "$LOADER" --arg neoforge "$NEOFORGE" \
+            '{pack:{mc:$mc, loader:$loader, neoforge_version:$neoforge}, results:.}'
+        ;;
+    verbose)
+        for r in "${RESULTS[@]}"; do
+            v=$(echo "$r" | jq -r '.verdict')
+            format_verbose "$r" "$v"
+        done
+        ;;
+    *)
+        for r in "${RESULTS[@]}"; do
+            v=$(echo "$r" | jq -r '.verdict')
+            format_terse "$r" "$v"
+        done
+        ;;
+esac
+
+exit "$EXIT_CODE"
