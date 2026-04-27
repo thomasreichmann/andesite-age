@@ -1,12 +1,12 @@
 name = "Andesite Age"
 author = "thomasar"
-version = "0.3.1"
+version = "0.3.2"
 pack-format = "packwiz:1.1.0"
 
 [index]
 file = "index.toml"
 hash-format = "sha256"
-hash = "6d8dad57577914256d667e14b1544d2a176dc7ebc13409b13d1b2277809c27f2"
+hash = "1decf8d84faa472cea54c6c186a61a21f0969276b93588a0510c050b06bb390d"
 
 [versions]
 minecraft = "1.21.1"
