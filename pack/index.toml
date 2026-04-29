@@ -39,11 +39,6 @@ hash = "4cb216ce5180c707ea38e47de43cbda4a927a4a0534d325d1cb8a72f7e529072"
 metafile = true
 
 [[files]]
-file = "mods/artifacts.pw.toml"
-hash = "5a21b57951f08465ee9a49e5a7650655291dd441e8ee114c6a7c7caf0a180527"
-metafile = true
-
-[[files]]
 file = "mods/bucketable.pw.toml"
 hash = "aa4e935273dd600da699a039dc9390049a8265cce221a41210a95992fb857586"
 metafile = true
@@ -61,16 +56,6 @@ metafile = true
 [[files]]
 file = "mods/charm-of-undying.pw.toml"
 hash = "bf0c5cf4279509496b9763b7f04449862fbc7277da2c7d368c8caa439c7c3e65"
-metafile = true
-
-[[files]]
-file = "mods/cinematic-cataclysm.pw.toml"
-hash = "45c8140947789e456b351bd6faffb4eda2385f3ddfae755f5ca25687ab36ec93"
-metafile = true
-
-[[files]]
-file = "mods/collective.pw.toml"
-hash = "a567cd22b6f35cb5f71b4aa394c01d341ce01274c9b6256cbcc6f48a450a2ba3"
 metafile = true
 
 [[files]]
@@ -169,11 +154,6 @@ hash = "69495e979400e63b317b80a71bdd9276929d503b12fa0e73bc668c474d5dbc4c"
 metafile = true
 
 [[files]]
-file = "mods/fdlib.pw.toml"
-hash = "66ebc57b6ea5e09a154e21ee6edd384fbbe3002872026bf8224eede15e458456"
-metafile = true
-
-[[files]]
 file = "mods/ferrite-core.pw.toml"
 hash = "73360e397134d238ee8fd21d33fd7f9275e9441f74f8f1b6ed92278877c0b9f1"
 metafile = true
@@ -234,23 +214,8 @@ hash = "ea28bcac23c070998d1f7df5dcbf248831c33f59067eaf2fd125adfa07c5722c"
 metafile = true
 
 [[files]]
-file = "mods/macaws-furniture.pw.toml"
-hash = "52019f01292cb860fa135485f941fff42f97910267bf122f2f797e31109bb93f"
-metafile = true
-
-[[files]]
-file = "mods/macaws-holidays.pw.toml"
-hash = "b9c4ccbf05a9002ebdb8981caad8b2442fa851f9cea33699d41ea334938c8df0"
-metafile = true
-
-[[files]]
 file = "mods/macaws-lights-and-lamps.pw.toml"
 hash = "87366a5d82152829103539d930ad9c0e8edbd5a917f65657db76f718f5296927"
-metafile = true
-
-[[files]]
-file = "mods/macaws-paintings.pw.toml"
-hash = "643d332b262b72f86f806cc1410b4354803a07b6012c1210f06d2ca231cccd30"
 metafile = true
 
 [[files]]
@@ -284,11 +249,6 @@ hash = "bac10dc72e41ee6df7a09ebd7e16e905897d54a2d9cb9f0c3fa14f569bd6d992"
 metafile = true
 
 [[files]]
-file = "mods/moonlight.pw.toml"
-hash = "c05fa3fa9bc5700104d928b616b15e70d441085dd060c6501122747dc3805de1"
-metafile = true
-
-[[files]]
 file = "mods/mouse-tweaks.pw.toml"
 hash = "6bc414cc0f2d4c078fe83f384d786343f701f371d657c5279b5b0df1595804bd"
 metafile = true
@@ -306,11 +266,6 @@ metafile = true
 [[files]]
 file = "mods/puzzles-lib.pw.toml"
 hash = "6812c3faa178cd48c65c5b8e7aeef50bc0b63d8e3b2117065d6179a43d8d3649"
-metafile = true
-
-[[files]]
-file = "mods/realm-rpg-fallen-adventurers.pw.toml"
-hash = "e3dc2d295b421fd9e51608c84c1172dd794c94fb03fdcc85aa173257e4535728"
 metafile = true
 
 [[files]]
@@ -356,11 +311,6 @@ metafile = true
 [[files]]
 file = "mods/structory.pw.toml"
 hash = "e2ab46d275b5037d19198f4cff55fe3e4672c3f5c8ca60e91d3b3e57ab13810c"
-metafile = true
-
-[[files]]
-file = "mods/supplementaries.pw.toml"
-hash = "fa0e1562f9dc89d6428546c7388dcfce8706843333d58f16cadce42b56b81085"
 metafile = true
 
 [[files]]

@@ -66,8 +66,6 @@ layer of QoL, performance, and vanilla-gap-fillers. Nothing else.
 **Vanilla+ flavor**
 - Farmer's Delight — cooking, crops, and kitchen tools that fill vanilla's
   food gap (and pairs with Create: Central Kitchen for automation)
-- Supplementaries — decorative and utility blocks (sconces, signs, globes,
-  pedestals) in pure vanilla visual style
 
 **Magic**
 - Ars Nouveau — glyph-based spellcrafting and magical automation; the
